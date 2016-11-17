@@ -1,5 +1,6 @@
 
 
+import pacliente.Properties;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
@@ -36,7 +37,7 @@ public class TcpToServer
                 ooStream.writeObject(cmd);
                 ooStream.flush();
                 
-            } while(!cmd.equals(Properties.DISCONNECT_COMMAND));
+            } while(!cmd.equals(Properties.COMMAND_DISCONNECT));
             ooStream.close();
             
             thread_tcpconn.join();

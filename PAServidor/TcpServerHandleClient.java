@@ -1,4 +1,5 @@
 
+import paservidor.Properties;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -7,6 +8,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import paservidor.Database;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -22,11 +24,13 @@ public class TcpServerHandleClient implements Runnable {
 
     private final Socket socket;
     private String current_folder;
+    private final Database database;
     
     public TcpServerHandleClient(Socket socket)
     {
         this.socket = socket;
         this.current_folder = "/";
+        this.database = new Database();
     }
     
     @Override
@@ -47,7 +51,7 @@ public class TcpServerHandleClient implements Runnable {
                 command = (String)oiStream.readObject();
                 runCommand(command, ooStream);
                 
-            }while(!command.equals(Properties.DISCONNECT_COMMAND));
+            }while(!command.equals(Properties.COMMAND_DISCONNECT));
             
             oStream.close();
             iStream.close();
@@ -62,14 +66,14 @@ public class TcpServerHandleClient implements Runnable {
     
     public void runCommand(String command, ObjectOutputStream ooStream)
     {
-        if(command.equals(Properties.DISCONNECT_COMMAND))
+        if(command.equals(Properties.COMMAND_DISCONNECT))
             return;
         
-        if(command.equals(Properties.CUR_DIR_PATH_COMMAND))
+        if(command.equals(Properties.COMMAND_CUR_DIR_PATH))
         {
             try
             {
-                ooStream.writeObject(Properties.CUR_DIR_PATH_COMMAND);
+                ooStream.writeObject(Properties.COMMAND_CUR_DIR_PATH);
                 ooStream.writeObject(current_folder);
                 ooStream.flush();
             }
@@ -78,9 +82,38 @@ public class TcpServerHandleClient implements Runnable {
                 Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        else
+        else if(command.startsWith(Properties.COMMAND_REGISTER))
         {
-            //
+            String [] params = command.split(" ");
+            if(database.checkUser(params[1]))
+            {
+                try
+                {
+                    ooStream.writeObject(Properties.COMMAND_REGISTER);
+                    ooStream.writeObject(Properties.ERROR_ALREADY_REGISTERED);
+                    ooStream.flush();
+                }
+                catch (IOException ex)
+                {
+                    Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            else
+            {
+                if(database.addUser(params[1], params[2]))
+                {
+                    try
+                    {
+                        ooStream.writeObject(Properties.COMMAND_REGISTER);
+                        ooStream.writeObject(Properties.SUCCESS_REGISTER);
+                        ooStream.flush();
+                    }
+                    catch (IOException ex)
+                    {
+                        Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
         }
     }
 }
