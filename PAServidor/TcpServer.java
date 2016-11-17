@@ -1,8 +1,6 @@
 
 
 import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -11,27 +9,20 @@ import java.net.SocketException;
 
 public class TcpServer
 {
-    public final static int COMM_PORT = 5007;
-
     private ServerSocket serverSocket;
-    private InetSocketAddress inboundAddr;
-    private TcpPayload payload;
+    
 
-    public TcpServer()
+    public TcpServer(int port)
     {
-        this.payload = new TcpPayload();
-        initServerSocket();
+        initServerSocket(port);
         try
         {
             while (true)
             {
-                // listen for and accept a client connection to serverSocket
-                Socket sock = this.serverSocket.accept();
-                OutputStream oStream = sock.getOutputStream();
-                ObjectOutputStream ooStream = new ObjectOutputStream(oStream);
-                ooStream.writeObject(this.payload);  // send serilized payload
-                ooStream.close();
-                Thread.sleep(1000);
+                Socket socket = this.serverSocket.accept();
+                TcpServerHandleClient handle = new TcpServerHandleClient(socket);
+                Thread threadhandle = new Thread(handle);
+                threadhandle.start();
             }
         }
         catch (SecurityException se)
@@ -46,7 +37,6 @@ public class TcpServer
             System.err.println(ioe.toString());
             System.exit(1);
         }
-        catch (InterruptedException ie) { }  // Thread sleep interrupted
         finally
         {
             try
@@ -62,12 +52,11 @@ public class TcpServer
         }
     }
 
-    private void initServerSocket()
+    private void initServerSocket(int port)
     {
-        this.inboundAddr = new InetSocketAddress(COMM_PORT);
         try
         {
-            this.serverSocket = new java.net.ServerSocket(COMM_PORT);
+            this.serverSocket = new java.net.ServerSocket(port);
             assert this.serverSocket.isBound();
             if (this.serverSocket.isBound())
             {
