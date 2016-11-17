@@ -76,9 +76,33 @@ class TcpToServerReceiver implements Runnable
             {
                 output_type = (Integer)oiStream.readObject();
                 if(Objects.equals(output_type, Properties.SUCCESS_REGISTER))
-                    System.out.println("You are successfully registered! Loin now.");
+                    System.out.println("You are successfully registered! Login now.");
                 else if(Objects.equals(output_type, Properties.ERROR_ALREADY_REGISTERED))
                     System.out.println("You are already registered.");
+                else if(Objects.equals(output_type, Properties.ERROR_MISSING_PARAMS))
+                    System.out.println("Missing parameters. register [username] [password]");
+            } 
+            catch (IOException | ClassNotFoundException ex)
+            {
+                Logger.getLogger(TcpToServerReceiver.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        else if(command.startsWith(Properties.COMMAND_LOGIN))
+        {
+            Integer output_type;
+            try
+            {
+                output_type = (Integer)oiStream.readObject();
+                if(Objects.equals(output_type, Properties.SUCCESS_LOGGED))
+                    System.out.println("You are logged now!");
+                else if(Objects.equals(output_type, Properties.ERROR_ALREADY_LOGGED))
+                    System.out.println("You are already registered.");
+                else if(Objects.equals(output_type, Properties.ERROR_WRONG_PASSWORD))
+                    System.out.println("Erong login password.");
+                else if(Objects.equals(output_type, Properties.ERROR_MISSING_PARAMS))
+                    System.out.println("Missing parameters. login [username] [password]");
+                else if(Objects.equals(output_type, Properties.ERROR_ACCOUNT_NOT_FOUND))
+                    System.out.println("You are not registered.");
             } 
             catch (IOException | ClassNotFoundException ex)
             {
