@@ -1,8 +1,10 @@
 
+import pacliente.Properties;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.net.Socket;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -40,7 +42,7 @@ class TcpToServerReceiver implements Runnable
                 cmd = (String)oiStream.readObject();
                 runCommand(cmd, oiStream);
                 
-            }while(!cmd.equals(Properties.DISCONNECT_COMMAND));
+            }while(!cmd.equals(Properties.COMMAND_DISCONNECT));
             oiStream.close();
         }
         catch (IOException | ClassNotFoundException ex)
@@ -51,10 +53,10 @@ class TcpToServerReceiver implements Runnable
     
     public void runCommand(String command, ObjectInputStream oiStream)
     {
-        if(command.equals(Properties.DISCONNECT_COMMAND))
+        if(command.equals(Properties.COMMAND_DISCONNECT))
             return;
         
-        if(command.equals(Properties.CUR_DIR_PATH_COMMAND))
+        if(command.equals(Properties.COMMAND_CUR_DIR_PATH))
         {
             String server_output;
             try
@@ -67,9 +69,21 @@ class TcpToServerReceiver implements Runnable
                 Logger.getLogger(TcpToServerReceiver.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        else
+        else if(command.startsWith(Properties.COMMAND_REGISTER))
         {
-            
+            Integer output_type;
+            try
+            {
+                output_type = (Integer)oiStream.readObject();
+                if(Objects.equals(output_type, Properties.SUCCESS_REGISTER))
+                    System.out.println("You are successfully registered! Loin now.");
+                else if(Objects.equals(output_type, Properties.ERROR_ALREADY_REGISTERED))
+                    System.out.println("You are already registered.");
+            } 
+            catch (IOException | ClassNotFoundException ex)
+            {
+                Logger.getLogger(TcpToServerReceiver.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
 }
