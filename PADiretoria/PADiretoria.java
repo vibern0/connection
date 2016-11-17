@@ -2,11 +2,32 @@
 import java.io.IOException;
 import java.net.SocketException;
 
-
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 
 public class PADiretoria
 {
-    public static void main(String[] args)
+    public static void main(String[] args) throws Exception {
+        int mcPort = 12345;
+        String mcIPStr = "230.1.1.1";
+        DatagramSocket udpSocket = new DatagramSocket();
+
+        InetAddress mcIPAddress = InetAddress.getByName(mcIPStr);
+        DatagramPacket packet = new DatagramPacket(new byte[1024], 1024);
+        udpSocket.receive(packet);
+        byte[] msg = packet.getData();
+        packet = new DatagramPacket(msg, msg.length);
+        packet.setAddress(mcIPAddress);
+        packet.setPort(mcPort);
+        udpSocket.send(packet);
+
+        System.out.println("Sent a  multicast message.");
+        System.out.println("Exiting application");
+        udpSocket.close();
+      }
+    
+    /*public static void main(String[] args)
     {
         UdpServer udpserver = null;
         
@@ -26,5 +47,5 @@ public class PADiretoria
                 udpserver.closeSocket();
             }
         }
-    }
+    }*/
 }
