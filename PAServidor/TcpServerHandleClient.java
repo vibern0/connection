@@ -6,6 +6,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import paservidor.Database;
@@ -25,12 +26,14 @@ public class TcpServerHandleClient implements Runnable {
     private final Socket socket;
     private String current_folder;
     private final Database database;
+    private boolean logged;
     
     public TcpServerHandleClient(Socket socket)
     {
         this.socket = socket;
         this.current_folder = "/";
         this.database = new Database();
+        this.logged = false;
     }
     
     @Override
@@ -85,6 +88,22 @@ public class TcpServerHandleClient implements Runnable {
         else if(command.startsWith(Properties.COMMAND_REGISTER))
         {
             String [] params = command.split(" ");
+            
+            if(params.length < 3)
+            {
+                try
+                {
+                    ooStream.writeObject(Properties.COMMAND_REGISTER);
+                    ooStream.writeObject(Properties.ERROR_MISSING_PARAMS);
+                    ooStream.flush();
+                }
+                catch (IOException ex)
+                {
+                    Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                return;
+            }
+            
             if(database.checkUser(params[1]))
             {
                 try
@@ -114,6 +133,61 @@ public class TcpServerHandleClient implements Runnable {
                     }
                 }
             }
+        }
+        else if(command.startsWith(Properties.COMMAND_LOGIN))
+        {
+            String [] params = command.split(" ");
+            Integer result;
+            
+            if(logged)
+            {
+                try
+                {
+                    ooStream.writeObject(Properties.COMMAND_LOGIN);
+                    ooStream.writeObject(Properties.ERROR_ALREADY_LOGGED);
+                    ooStream.flush();
+                }
+                catch (IOException ex)
+                {
+                    Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                return;
+            }
+            
+            if(params.length < 3)
+            {
+                try
+                {
+                    ooStream.writeObject(Properties.COMMAND_LOGIN);
+                    ooStream.writeObject(Properties.ERROR_MISSING_PARAMS);
+                    ooStream.flush();
+                }
+                catch (IOException ex)
+                {
+                    Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                return;
+            }
+            
+            try
+            {
+                result = database.checkLogin(params[1], params[2]);
+                ooStream.writeObject(Properties.COMMAND_LOGIN);
+                ooStream.writeObject(result);
+                ooStream.flush();
+                
+                if(Objects.equals(result, Properties.SUCCESS_LOGGED))
+                    logged = true;
+            }
+            catch (IOException ex)
+            {
+                Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
+            }
+           
+        }
+        else if(command.equals(Properties.COMMAND_LOGOUT))
+        {
+            //
         }
     }
 }

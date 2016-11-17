@@ -92,6 +92,34 @@ public class Database {
         return false;
     }
     
+    public int checkLogin(String username, String password)
+    {
+        if(!checkUser(username))
+            return Properties.ERROR_ACCOUNT_NOT_FOUND;
+        
+        try
+        {
+            Integer found = Properties.ERROR_WRONG_PASSWORD;
+            stmt = c.createStatement();
+            ResultSet rs = stmt.executeQuery( "SELECT * FROM users WHERE name='" +
+                    username + "' AND password='" + password + "'");
+            
+            if(rs.next())
+            {
+                found = Properties.SUCCESS_LOGGED;
+            }
+            rs.close();
+            stmt.close();
+            
+            return found;
+        }
+        catch (SQLException ex)
+        {
+            Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return Properties.ERROR_WRONG_PASSWORD;
+    }
+    
     public boolean checkUser(String username)
     {
         try
