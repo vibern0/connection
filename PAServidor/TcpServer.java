@@ -64,6 +64,7 @@ public class TcpServer
                     this.serverSocket.getLocalPort() +
                     " is ready and waiting for client to connect...");
             }
+            
         }
         catch (SocketException se)
         {
