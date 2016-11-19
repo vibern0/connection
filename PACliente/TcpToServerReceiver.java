@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.net.Socket;
-import java.util.Objects;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -75,11 +75,11 @@ class TcpToServerReceiver implements Runnable
             try
             {
                 output_type = (Integer)oiStream.readObject();
-                if(Objects.equals(output_type, Properties.SUCCESS_REGISTER))
+                if(output_type.equals(Properties.SUCCESS_REGISTER))
                     System.out.println("You are successfully registered! Login now.");
-                else if(Objects.equals(output_type, Properties.ERROR_ALREADY_REGISTERED))
+                else if(output_type.equals(Properties.ERROR_ALREADY_REGISTERED))
                     System.out.println("You are already registered.");
-                else if(Objects.equals(output_type, Properties.ERROR_MISSING_PARAMS))
+                else if(output_type.equals(Properties.ERROR_MISSING_PARAMS))
                     System.out.println("Missing parameters. register [username] [password]");
             } 
             catch (IOException | ClassNotFoundException ex)
@@ -93,16 +93,93 @@ class TcpToServerReceiver implements Runnable
             try
             {
                 output_type = (Integer)oiStream.readObject();
-                if(Objects.equals(output_type, Properties.SUCCESS_LOGGED))
+                if(output_type.equals(Properties.SUCCESS_LOGGED))
                     System.out.println("You are logged now!");
-                else if(Objects.equals(output_type, Properties.ERROR_ALREADY_LOGGED))
+                else if(output_type.equals(Properties.ERROR_ALREADY_LOGGED))
                     System.out.println("You are already registered.");
-                else if(Objects.equals(output_type, Properties.ERROR_WRONG_PASSWORD))
+                else if(output_type.equals(Properties.ERROR_WRONG_PASSWORD))
                     System.out.println("Erong login password.");
-                else if(Objects.equals(output_type, Properties.ERROR_MISSING_PARAMS))
+                else if(output_type.equals(Properties.ERROR_MISSING_PARAMS))
                     System.out.println("Missing parameters. login [username] [password]");
-                else if(Objects.equals(output_type, Properties.ERROR_ACCOUNT_NOT_FOUND))
+                else if(output_type.equals(Properties.ERROR_ACCOUNT_NOT_FOUND))
                     System.out.println("You are not registered.");
+            } 
+            catch (IOException | ClassNotFoundException ex)
+            {
+                Logger.getLogger(TcpToServerReceiver.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        else if(command.startsWith(Properties.COMMAND_LOGOUT))
+        {
+            Integer output_type;
+            try
+            {
+                output_type = (Integer)oiStream.readObject();
+                if(output_type.equals(Properties.SUCCESS_LOGOUT))
+                    System.out.println("You are unlogged now!");
+                else if(output_type.equals(Properties.ERROR_NOT_LOGGED))
+                    System.out.println("You are not logged yet.");
+            } 
+            catch (IOException | ClassNotFoundException ex)
+            {
+                Logger.getLogger(TcpToServerReceiver.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        else if(command.equals(Properties.COMMAND_CREATE_DIRECTORY))
+        {
+            Integer output_type;
+            try
+            {
+                output_type = (Integer)oiStream.readObject();
+                if(output_type.equals(Properties.SUCCESS_CREATE_DIRECTORY))
+                    System.out.println("Directory created!");
+                else if(output_type.equals(Properties.ERROR_NOT_LOGGED))
+                    System.out.println("You are not logged yet.");
+                else if(output_type.equals(Properties.ERROR_MISSING_PARAMS))
+                    System.out.println("Missing parameters. mkdir [direcory name]");
+            } 
+            catch (IOException | ClassNotFoundException ex)
+            {
+                Logger.getLogger(TcpToServerReceiver.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        else if(command.equals(Properties.COMMAND_LIST_CONTENT))
+        {
+            Integer output_type;
+            try
+            {
+                output_type = (Integer)oiStream.readObject();
+                if(output_type.equals(Properties.ERROR_NOT_LOGGED))
+                    System.out.println("You are not logged yet.");
+                else if(output_type.equals(Properties.SUCCESS_SLIST_CONTENT_DIR))
+                {
+                    ArrayList<String> content = (ArrayList)oiStream.readObject();
+                    for(String c : content)
+                    {
+                        System.out.println(c);
+                    }
+                }
+               
+            } 
+            catch (IOException | ClassNotFoundException ex)
+            {
+                Logger.getLogger(TcpToServerReceiver.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        else if(command.equals(Properties.COMMAND_CHANGE_DIRECTORY))
+        {
+            Integer output_type;
+            try
+            {
+                output_type = (Integer)oiStream.readObject();
+                if(output_type.equals(Properties.ERROR_NOT_LOGGED))
+                    System.out.println("You are not logged yet.");
+                else if(output_type.equals(Properties.ERROR_ON_ROOT_FOLDER))
+                    System.out.println("You are on root folder.");
+                else if(output_type.equals(Properties.ERROR_MISSING_PARAMS))
+                    System.out.println("Missing parameters. Use cd [directory]");
+                else if(output_type.equals(Properties.SUCCESS_CHANGE_DIRECTORY))
+                    System.out.println("Yu moved to another folder.");
             } 
             catch (IOException | ClassNotFoundException ex)
             {
