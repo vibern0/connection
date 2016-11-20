@@ -17,9 +17,17 @@ public class UdpClient {
         DatagramPacket packet = null;
         
         try{
-
+           
             serverAddr = InetAddress.getByName(ip);
             serverPort = port;  
+            
+            //-----------------Cria thread e lanca
+//            Thread t = new HeartbeatClient("127.0.0.1", 6000);
+//            
+//            t.setDaemon(true);
+//            t.start();
+            //------------------Thread ja esta a correr
+            
             socket = new DatagramSocket();
             socket.setSoTimeout(TIMEOUT*1000);
             
