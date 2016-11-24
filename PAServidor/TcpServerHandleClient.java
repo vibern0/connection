@@ -1,18 +1,21 @@
 
+
 import paservidor.Properties;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.ObjectStreamException;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.nio.file.DirectoryIteratorException;
+import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.DirectoryStream;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
+import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import paservidor.Database;
@@ -74,69 +77,37 @@ public class TcpServerHandleClient implements Runnable {
     }
     
     public void runCommand(String command, ObjectOutputStream ooStream)
+            throws ObjectStreamException, FileAlreadyExistsException,
+                SecurityException, UnsupportedOperationException,
+                NotDirectoryException, DirectoryNotEmptyException,
+                UnsupportedOperationException, IOException
     {
         if(command.equals(Properties.COMMAND_DISCONNECT))
             return;
         
         if(command.equals(Properties.COMMAND_CUR_DIR_PATH))
         {
-            try
-            {
-                ooStream.writeObject(Properties.COMMAND_CUR_DIR_PATH);
-                ooStream.writeObject(current_folder);
-                ooStream.flush();
-            }
-            catch (IOException ex)
-            {
-                Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            ooStream.writeObject(Properties.COMMAND_CUR_DIR_PATH);
+            ooStream.writeObject(current_folder);
+            ooStream.flush();
         }
         else if(command.startsWith(Properties.COMMAND_REGISTER))
         {
             String [] params = command.split(" ");
             
-            if(params.length < 3)
-            {
-                try
-                {
-                    ooStream.writeObject(Properties.COMMAND_REGISTER);
-                    ooStream.writeObject(Properties.ERROR_MISSING_PARAMS);
-                    ooStream.flush();
-                }
-                catch (IOException ex)
-                {
-                    Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                return;
-            }
-            
             if(database.checkUser(params[1]))
             {
-                try
-                {
-                    ooStream.writeObject(Properties.COMMAND_REGISTER);
-                    ooStream.writeObject(Properties.ERROR_ALREADY_REGISTERED);
-                    ooStream.flush();
-                }
-                catch (IOException ex)
-                {
-                    Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                ooStream.writeObject(Properties.COMMAND_REGISTER);
+                ooStream.writeObject(Properties.ERROR_ALREADY_REGISTERED);
+                ooStream.flush();
             }
             else
             {
                 if(database.addUser(params[1], params[2]))
                 {
-                    try
-                    {
-                        ooStream.writeObject(Properties.COMMAND_REGISTER);
-                        ooStream.writeObject(Properties.SUCCESS_REGISTER);
-                        ooStream.flush();
-                    }
-                    catch (IOException ex)
-                    {
-                        Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+                    ooStream.writeObject(Properties.COMMAND_REGISTER);
+                    ooStream.writeObject(Properties.SUCCESS_REGISTER);
+                    ooStream.flush();
                 }
             }
         }
@@ -145,252 +116,143 @@ public class TcpServerHandleClient implements Runnable {
             String [] params = command.split(" ");
             Integer result;
             
-            if(logged)
-            {
-                try
-                {
-                    ooStream.writeObject(Properties.COMMAND_LOGIN);
-                    ooStream.writeObject(Properties.ERROR_ALREADY_LOGGED);
-                    ooStream.flush();
-                }
-                catch (IOException ex)
-                {
-                    Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                return;
-            }
-            
-            if(params.length < 3)
-            {
-                try
-                {
-                    ooStream.writeObject(Properties.COMMAND_LOGIN);
-                    ooStream.writeObject(Properties.ERROR_MISSING_PARAMS);
-                    ooStream.flush();
-                }
-                catch (IOException ex)
-                {
-                    Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                return;
-            }
-            
-            try
-            {
-                result = database.checkLogin(params[1], params[2]);
-                ooStream.writeObject(Properties.COMMAND_LOGIN);
-                ooStream.writeObject(result);
-                ooStream.flush();
-                
-                if(Objects.equals(result, Properties.SUCCESS_LOGGED))
-                    logged = true;
-            }
-            catch (IOException ex)
-            {
-                Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
-            }
-           
+            result = database.checkLogin(params[1], params[2]);
+            ooStream.writeObject(Properties.COMMAND_LOGIN);
+            ooStream.writeObject(result);
+            ooStream.flush();
+
+            if(result.equals(Properties.SUCCESS_LOGGED))
+                logged = true;
         }
         else if(command.equals(Properties.COMMAND_LOGOUT))
         {
-            if(!logged)
-            {
-                try
-                {
-                    ooStream.writeObject(Properties.COMMAND_LOGOUT);
-                    ooStream.writeObject(Properties.ERROR_NOT_LOGGED);
-                    ooStream.flush();
-                }
-                catch (IOException ex)
-                {
-                    Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                return;
-            }
-            
-            logged = false;
-            
-            try
-            {
-                ooStream.writeObject(Properties.COMMAND_LOGOUT);
-                ooStream.writeObject(Properties.SUCCESS_LOGOUT);
-                ooStream.flush();
-            }
-            catch (IOException ex)
-            {
-                Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            ooStream.writeObject(Properties.COMMAND_LOGOUT);
+            ooStream.writeObject(Properties.SUCCESS_LOGOUT);
+            ooStream.flush();
         }
         else if(command.startsWith(Properties.COMMAND_CREATE_DIRECTORY))
         {
             String [] params = command.split(" ");
             
-            if(!logged)
-            {
-                try
-                {
-                    ooStream.writeObject(Properties.COMMAND_CREATE_DIRECTORY);
-                    ooStream.writeObject(Properties.ERROR_NOT_LOGGED);
-                    ooStream.flush();
-                }
-                catch (IOException ex)
-                {
-                    Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                return;
-            }
-            
-            if(params.length < 2)
-            {
-                try
-                {
-                    ooStream.writeObject(Properties.COMMAND_CREATE_DIRECTORY);
-                    ooStream.writeObject(Properties.ERROR_MISSING_PARAMS);
-                    ooStream.flush();
-                }
-                catch (IOException ex)
-                {
-                    Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                return;
-            }
-            
-            try
-            {
-                Path currentRelativePath = Paths.get("");
-                String path = currentRelativePath.toAbsolutePath().toString();
-            
-                Files.createDirectories(Paths.get(path + current_folder + params[1]));
-                
-                ooStream.writeObject(Properties.COMMAND_CREATE_DIRECTORY);
-                ooStream.writeObject(Properties.SUCCESS_CREATE_DIRECTORY);
-                ooStream.flush();
-            }
-            catch (IOException ex)
-            {
-                Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            Path currentRelativePath = Paths.get("");
+            String path = currentRelativePath.toAbsolutePath().toString();
+
+            Files.createDirectories(Paths.get(path + current_folder + params[1]));
+
+            ooStream.writeObject(Properties.COMMAND_CREATE_DIRECTORY);
+            ooStream.writeObject(Properties.SUCCESS_CREATE_DIRECTORY);
+            ooStream.flush();
         }
         else if(command.equals(Properties.COMMAND_LIST_CONTENT))
         {
-            if(!logged)
-            {
-                try
-                {
-                    ooStream.writeObject(Properties.COMMAND_LIST_CONTENT);
-                    ooStream.writeObject(Properties.ERROR_NOT_LOGGED);
-                    ooStream.flush();
-                }
-                catch (IOException ex)
-                {
-                    Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                return;
-            }
-            
             ArrayList<String> content = new ArrayList<>();
             Path currentRelativePath = Paths.get("");
             String path = currentRelativePath.toAbsolutePath().toString();
             Path dir = Paths.get(path + current_folder);
                 
-            try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir))
+            DirectoryStream<Path> stream = Files.newDirectoryStream(dir);
+            for (Path file: stream)
             {
-                for (Path file: stream)
-                {
-                    content.add(file.getFileName().toString());
-                }
-                ooStream.writeObject(Properties.COMMAND_LIST_CONTENT);
-                ooStream.writeObject(Properties.SUCCESS_SLIST_CONTENT_DIR);
-                ooStream.writeObject((ArrayList)content);
-                ooStream.flush();
+                content.add(file.getFileName().toString());
             }
-            catch (IOException | DirectoryIteratorException ex)
-            {
-                Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            ooStream.writeObject(Properties.COMMAND_LIST_CONTENT);
+            ooStream.writeObject(Properties.SUCCESS_SLIST_CONTENT_DIR);
+            ooStream.writeObject((ArrayList)content);
+            ooStream.flush();
         }
         else if(command.startsWith(Properties.COMMAND_CHANGE_DIRECTORY))
         {
             String [] params = command.split(" ");
             
-            if(!logged)
-            {
-                try
-                {
-                    ooStream.writeObject(Properties.COMMAND_CHANGE_DIRECTORY);
-                    ooStream.writeObject(Properties.ERROR_NOT_LOGGED);
-                    ooStream.flush();
-                }
-                catch (IOException ex)
-                {
-                    Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                return;
-            }
-            
-            if(params.length < 2)
-            {
-                try
-                {
-                    ooStream.writeObject(Properties.COMMAND_CHANGE_DIRECTORY);
-                    ooStream.writeObject(Properties.ERROR_MISSING_PARAMS);
-                    ooStream.flush();
-                }
-                catch (IOException ex)
-                {
-                    Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                return;
-            }
-            
             ArrayList<String> content = new ArrayList<>();
             Path currentRelativePath = Paths.get("");
             String path = currentRelativePath.toAbsolutePath().toString();
-            Path dir = currentRelativePath;
             
-            if(params[1].equals(".."))
+            String [] moves = params[1].split("/");
+            boolean success = true;
+            
+            for(String move : moves)
             {
-                if(current_folder.equals("/"))
+                if(move.equals(".."))
                 {
-                    try
+                    if(current_folder.equals("/"))
                     {
-                        ooStream.writeObject(Properties.COMMAND_CHANGE_DIRECTORY);
-                        ooStream.writeObject(Properties.ERROR_ON_ROOT_FOLDER);
-                        ooStream.flush();
+                        success = false;
+                        break;
                     }
-                    catch (IOException ex)
+                    else
                     {
-                        Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
+                        String opath = current_folder.substring(0, current_folder.length()-1);
+                        int last = opath.lastIndexOf("/");
+                        current_folder = current_folder.substring(0, last + 1);
                     }
                 }
-                else
+                else 
                 {
-                    String opath = current_folder.substring(0, current_folder.length()-1);
-                    int last = opath.lastIndexOf("/");
-                    current_folder = current_folder.substring(0, last + 1);
-                    
-                    dir = Paths.get(path + current_folder);
+                    current_folder += move + "/";
+                }   
+
+                if (!Files.exists(Paths.get(path + current_folder)))
+                {
+                    success = false;
+                    break;
                 }
             }
-            else 
-            {
-                current_folder += params[1] + "/";
-                dir = Paths.get(path + current_folder);
-            }   
             
-            if (Files.exists(dir))
+            ooStream.writeObject(Properties.COMMAND_CHANGE_DIRECTORY);
+            if(!success)
             {
-                try
-                {
-                    ooStream.writeObject(Properties.COMMAND_CHANGE_DIRECTORY);
-                    ooStream.writeObject(Properties.SUCCESS_CHANGE_DIRECTORY);
-                    ooStream.flush();
-                }
-                catch (IOException ex)
-                {
-                    Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                ooStream.writeObject(Properties.ERROR_ON_ROOT_FOLDER);
             }
+            else
+            {
+                ooStream.writeObject(Properties.SUCCESS_CHANGE_DIRECTORY);
+            }
+            ooStream.flush();
+        }
+        else if(command.startsWith(Properties.COMMAND_COPY_FILE))
+        {
+            String [] params = command.split(" ");
+            
+            Path currentRelativePath = Paths.get("");
+            String path = currentRelativePath.toAbsolutePath().toString();
+            
+            Path source = Paths.get(path + current_folder + params[1]);
+            Path newdir = Paths.get(path + current_folder + params[2] + "/" + params[1]);
+            Path ret = Files.copy(source, newdir);
+            
+            ooStream.writeObject(Properties.COMMAND_COPY_FILE);
+            if(ret == null)
+            {
+                ooStream.writeObject(Properties.ERROR_WHEN_COPY_FILE); 
+            }
+            else
+            {
+                ooStream.writeObject(Properties.SUCCESS_WHEN_COPY_FILE);
+            }
+            ooStream.flush();
+        }
+        else if(command.startsWith(Properties.COMMAND_MOVE_FILE))
+        {
+            String [] params = command.split(" ");
+            
+            Path currentRelativePath = Paths.get("");
+            String path = currentRelativePath.toAbsolutePath().toString();
+            
+            Path source = Paths.get(path + current_folder + params[1]);
+            Path newdir = Paths.get(path + current_folder + params[2] + "/" + params[1]);
+            Path ret = Files.move(source, newdir);
+            
+            ooStream.writeObject(Properties.COMMAND_MOVE_FILE);
+            if(ret == null)
+            {
+                ooStream.writeObject(Properties.ERROR_WHEN_MOVE_FILE);
+            }
+            else
+            {
+                ooStream.writeObject(Properties.SUCCESS_WHEN_MOVE_FILE);
+            }
+            ooStream.flush();
         }
     }
 }
