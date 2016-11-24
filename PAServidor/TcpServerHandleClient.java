@@ -1,4 +1,7 @@
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import paservidor.Properties;
 import java.io.IOException;
 import java.io.InputStream;
@@ -391,6 +394,88 @@ public class TcpServerHandleClient implements Runnable {
                     Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
+        }
+        else if(command.startsWith(Properties.COMMAND_COPY_FILE))
+        {
+            String [] params = command.split(" ");
+            
+            if(!logged)
+            {
+                try
+                {
+                    ooStream.writeObject(Properties.COMMAND_COPY_FILE);
+                    ooStream.writeObject(Properties.ERROR_NOT_LOGGED);
+                    ooStream.flush();
+                }
+                catch (IOException ex)
+                {
+                    Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                return;
+            }
+            
+            if(params.length < 3)
+            {
+                try
+                {
+                    ooStream.writeObject(Properties.COMMAND_COPY_FILE);
+                    ooStream.writeObject(Properties.ERROR_MISSING_PARAMS);
+                    ooStream.flush();
+                }
+                catch (IOException ex)
+                {
+                    Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                return;
+            }
+            
+            //open file
+            //read it
+            //write in new place
+            
+            //send a message saying if it was successfully copied or an error
+            //occurred
+        }
+        else if(command.startsWith(Properties.COMMAND_MOVE_FILE))
+        {
+            String [] params = command.split(" ");
+            
+            if(!logged)
+            {
+                try
+                {
+                    ooStream.writeObject(Properties.COMMAND_MOVE_FILE);
+                    ooStream.writeObject(Properties.ERROR_NOT_LOGGED);
+                    ooStream.flush();
+                }
+                catch (IOException ex)
+                {
+                    Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                return;
+            }
+            
+            if(params.length < 2)
+            {
+                try
+                {
+                    ooStream.writeObject(Properties.COMMAND_MOVE_FILE);
+                    ooStream.writeObject(Properties.ERROR_MISSING_PARAMS);
+                    ooStream.flush();
+                }
+                catch (IOException ex)
+                {
+                    Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                return;
+            }
+            
+            //open file
+            //read it
+            //write in new place
+            
+            //send a message saying if it was successfully copied or an error
+            //occurred
         }
     }
 }

@@ -20,6 +20,8 @@ public class Properties
     public static String    COMMAND_CREATE_DIRECTORY    = "mkdir";
     public static String    COMMAND_LIST_CONTENT        = "ls";
     public static String    COMMAND_CHANGE_DIRECTORY    = "cd";
+    public static String    COMMAND_COPY_FILE           = "cp";
+    public static String    COMMAND_MOVE_FILE           = "mv";
     
     public static Integer   ERROR_ALREADY_REGISTERED    = 1001;
     public static Integer   ERROR_ACCOUNT_NOT_FOUND     = 1002;
@@ -28,6 +30,8 @@ public class Properties
     public static Integer   ERROR_ALREADY_LOGGED        = 1005;
     public static Integer   ERROR_NOT_LOGGED            = 1006;
     public static Integer   ERROR_ON_ROOT_FOLDER        = 1007;
+    public static Integer   ERROR_WHEN_COPY_FILE        = 1008;
+    public static Integer   ERROR_WHEN_MOVE_FILE        = 1009;
     
     public static Integer   SUCCESS_REGISTER            = 2001;
     public static Integer   SUCCESS_LOGGED              = 2002;
@@ -35,4 +39,6 @@ public class Properties
     public static Integer   SUCCESS_SLIST_CONTENT_DIR   = 2004;
     public static Integer   SUCCESS_CHANGE_DIRECTORY    = 2005;
     public static Integer   SUCCESS_LOGOUT              = 2006;
+    public static Integer   SUCCESS_WHEN_COPY_FILE      = 2007;
+    public static Integer   SUCCESS_WHEN_MOVE_FILE      = 2008;
 }

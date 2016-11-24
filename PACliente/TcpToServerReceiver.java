@@ -186,5 +186,43 @@ class TcpToServerReceiver implements Runnable
                 Logger.getLogger(TcpToServerReceiver.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+        else if(command.equals(Properties.COMMAND_COPY_FILE))
+        {
+            Integer output_type;
+            try
+            {
+                output_type = (Integer)oiStream.readObject();
+                if(output_type.equals(Properties.ERROR_NOT_LOGGED))
+                    System.out.println("You are not logged yet.");
+                else if(output_type.equals(Properties.ERROR_WHEN_COPY_FILE))
+                    System.out.println("You are on root folder.");
+                else if(output_type.equals(Properties.ERROR_MISSING_PARAMS))
+                    System.out.println("Missing parameters. cp [source] [destination]");
+                else if(output_type.equals(Properties.SUCCESS_WHEN_COPY_FILE))
+                    System.out.println("Yu moved to another folder.");
+            } 
+            catch (IOException | ClassNotFoundException ex)
+            {
+                Logger.getLogger(TcpToServerReceiver.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        else if(command.equals(Properties.COMMAND_MOVE_FILE))
+        {
+            Integer output_type;
+            try
+            {
+                output_type = (Integer)oiStream.readObject();
+                if(output_type.equals(Properties.ERROR_NOT_LOGGED))
+                    System.out.println("You are not logged yet.");
+                else if(output_type.equals(Properties.ERROR_WHEN_MOVE_FILE))
+                    System.out.println("You are on root folder.");
+                else if(output_type.equals(Properties.SUCCESS_WHEN_MOVE_FILE))
+                    System.out.println("Yu moved to another folder.");
+            } 
+            catch (IOException | ClassNotFoundException ex)
+            {
+                Logger.getLogger(TcpToServerReceiver.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }
 }
