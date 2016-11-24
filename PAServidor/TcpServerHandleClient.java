@@ -1,6 +1,5 @@
 
 
-import java.io.File;
 import paservidor.Properties;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,7 +16,6 @@ import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import paservidor.Database;
@@ -123,7 +121,7 @@ public class TcpServerHandleClient implements Runnable {
             ooStream.writeObject(result);
             ooStream.flush();
 
-            if(Objects.equals(result, Properties.SUCCESS_LOGGED))
+            if(result.equals(Properties.SUCCESS_LOGGED))
                 logged = true;
         }
         else if(command.equals(Properties.COMMAND_LOGOUT))
@@ -223,18 +221,16 @@ public class TcpServerHandleClient implements Runnable {
             Path newdir = Paths.get(path + current_folder + params[2] + "/" + params[1]);
             Path ret = Files.copy(source, newdir);
             
+            ooStream.writeObject(Properties.COMMAND_COPY_FILE);
             if(ret == null)
             {
-                ooStream.writeObject(Properties.COMMAND_COPY_FILE);
-                ooStream.writeObject(Properties.ERROR_WHEN_COPY_FILE);
-                ooStream.flush();  
+                ooStream.writeObject(Properties.ERROR_WHEN_COPY_FILE); 
             }
             else
             {
-                ooStream.writeObject(Properties.COMMAND_COPY_FILE);
                 ooStream.writeObject(Properties.SUCCESS_WHEN_COPY_FILE);
-                ooStream.flush();  
             }
+            ooStream.flush();
         }
         else if(command.startsWith(Properties.COMMAND_MOVE_FILE))
         {
@@ -247,18 +243,16 @@ public class TcpServerHandleClient implements Runnable {
             Path newdir = Paths.get(path + current_folder + params[2] + "/" + params[1]);
             Path ret = Files.move(source, newdir);
             
+            ooStream.writeObject(Properties.COMMAND_MOVE_FILE);
             if(ret == null)
             {
-                ooStream.writeObject(Properties.COMMAND_MOVE_FILE);
                 ooStream.writeObject(Properties.ERROR_WHEN_MOVE_FILE);
-                ooStream.flush();  
             }
             else
             {
-                ooStream.writeObject(Properties.COMMAND_MOVE_FILE);
                 ooStream.writeObject(Properties.SUCCESS_WHEN_MOVE_FILE);
-                ooStream.flush();  
             }
+            ooStream.flush();
         }
     }
 }
