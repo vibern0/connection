@@ -94,7 +94,10 @@ class TcpToServerReceiver implements Runnable
             {
                 output_type = (Integer)oiStream.readObject();
                 if(output_type.equals(Properties.SUCCESS_LOGGED))
+                {
+                    Properties.LOGGED = true;
                     System.out.println("You are logged now!");
+                }
                 else if(output_type.equals(Properties.ERROR_ALREADY_LOGGED))
                     System.out.println("You are already registered.");
                 else if(output_type.equals(Properties.ERROR_WRONG_PASSWORD))

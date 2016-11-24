@@ -1,7 +1,5 @@
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+
 import paservidor.Properties;
 import java.io.IOException;
 import java.io.InputStream;
@@ -98,21 +96,6 @@ public class TcpServerHandleClient implements Runnable {
         {
             String [] params = command.split(" ");
             
-            if(params.length < 3)
-            {
-                try
-                {
-                    ooStream.writeObject(Properties.COMMAND_REGISTER);
-                    ooStream.writeObject(Properties.ERROR_MISSING_PARAMS);
-                    ooStream.flush();
-                }
-                catch (IOException ex)
-                {
-                    Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                return;
-            }
-            
             if(database.checkUser(params[1]))
             {
                 try
@@ -148,36 +131,6 @@ public class TcpServerHandleClient implements Runnable {
             String [] params = command.split(" ");
             Integer result;
             
-            if(logged)
-            {
-                try
-                {
-                    ooStream.writeObject(Properties.COMMAND_LOGIN);
-                    ooStream.writeObject(Properties.ERROR_ALREADY_LOGGED);
-                    ooStream.flush();
-                }
-                catch (IOException ex)
-                {
-                    Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                return;
-            }
-            
-            if(params.length < 3)
-            {
-                try
-                {
-                    ooStream.writeObject(Properties.COMMAND_LOGIN);
-                    ooStream.writeObject(Properties.ERROR_MISSING_PARAMS);
-                    ooStream.flush();
-                }
-                catch (IOException ex)
-                {
-                    Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                return;
-            }
-            
             try
             {
                 result = database.checkLogin(params[1], params[2]);
@@ -196,22 +149,6 @@ public class TcpServerHandleClient implements Runnable {
         }
         else if(command.equals(Properties.COMMAND_LOGOUT))
         {
-            if(!logged)
-            {
-                try
-                {
-                    ooStream.writeObject(Properties.COMMAND_LOGOUT);
-                    ooStream.writeObject(Properties.ERROR_NOT_LOGGED);
-                    ooStream.flush();
-                }
-                catch (IOException ex)
-                {
-                    Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                return;
-            }
-            
-            logged = false;
             
             try
             {
@@ -227,36 +164,6 @@ public class TcpServerHandleClient implements Runnable {
         else if(command.startsWith(Properties.COMMAND_CREATE_DIRECTORY))
         {
             String [] params = command.split(" ");
-            
-            if(!logged)
-            {
-                try
-                {
-                    ooStream.writeObject(Properties.COMMAND_CREATE_DIRECTORY);
-                    ooStream.writeObject(Properties.ERROR_NOT_LOGGED);
-                    ooStream.flush();
-                }
-                catch (IOException ex)
-                {
-                    Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                return;
-            }
-            
-            if(params.length < 2)
-            {
-                try
-                {
-                    ooStream.writeObject(Properties.COMMAND_CREATE_DIRECTORY);
-                    ooStream.writeObject(Properties.ERROR_MISSING_PARAMS);
-                    ooStream.flush();
-                }
-                catch (IOException ex)
-                {
-                    Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                return;
-            }
             
             try
             {
@@ -276,21 +183,6 @@ public class TcpServerHandleClient implements Runnable {
         }
         else if(command.equals(Properties.COMMAND_LIST_CONTENT))
         {
-            if(!logged)
-            {
-                try
-                {
-                    ooStream.writeObject(Properties.COMMAND_LIST_CONTENT);
-                    ooStream.writeObject(Properties.ERROR_NOT_LOGGED);
-                    ooStream.flush();
-                }
-                catch (IOException ex)
-                {
-                    Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                return;
-            }
-            
             ArrayList<String> content = new ArrayList<>();
             Path currentRelativePath = Paths.get("");
             String path = currentRelativePath.toAbsolutePath().toString();
@@ -315,36 +207,6 @@ public class TcpServerHandleClient implements Runnable {
         else if(command.startsWith(Properties.COMMAND_CHANGE_DIRECTORY))
         {
             String [] params = command.split(" ");
-            
-            if(!logged)
-            {
-                try
-                {
-                    ooStream.writeObject(Properties.COMMAND_CHANGE_DIRECTORY);
-                    ooStream.writeObject(Properties.ERROR_NOT_LOGGED);
-                    ooStream.flush();
-                }
-                catch (IOException ex)
-                {
-                    Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                return;
-            }
-            
-            if(params.length < 2)
-            {
-                try
-                {
-                    ooStream.writeObject(Properties.COMMAND_CHANGE_DIRECTORY);
-                    ooStream.writeObject(Properties.ERROR_MISSING_PARAMS);
-                    ooStream.flush();
-                }
-                catch (IOException ex)
-                {
-                    Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                return;
-            }
             
             ArrayList<String> content = new ArrayList<>();
             Path currentRelativePath = Paths.get("");
@@ -399,36 +261,6 @@ public class TcpServerHandleClient implements Runnable {
         {
             String [] params = command.split(" ");
             
-            if(!logged)
-            {
-                try
-                {
-                    ooStream.writeObject(Properties.COMMAND_COPY_FILE);
-                    ooStream.writeObject(Properties.ERROR_NOT_LOGGED);
-                    ooStream.flush();
-                }
-                catch (IOException ex)
-                {
-                    Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                return;
-            }
-            
-            if(params.length < 3)
-            {
-                try
-                {
-                    ooStream.writeObject(Properties.COMMAND_COPY_FILE);
-                    ooStream.writeObject(Properties.ERROR_MISSING_PARAMS);
-                    ooStream.flush();
-                }
-                catch (IOException ex)
-                {
-                    Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                return;
-            }
-            
             //open file
             //read it
             //write in new place
@@ -439,36 +271,6 @@ public class TcpServerHandleClient implements Runnable {
         else if(command.startsWith(Properties.COMMAND_MOVE_FILE))
         {
             String [] params = command.split(" ");
-            
-            if(!logged)
-            {
-                try
-                {
-                    ooStream.writeObject(Properties.COMMAND_MOVE_FILE);
-                    ooStream.writeObject(Properties.ERROR_NOT_LOGGED);
-                    ooStream.flush();
-                }
-                catch (IOException ex)
-                {
-                    Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                return;
-            }
-            
-            if(params.length < 2)
-            {
-                try
-                {
-                    ooStream.writeObject(Properties.COMMAND_MOVE_FILE);
-                    ooStream.writeObject(Properties.ERROR_MISSING_PARAMS);
-                    ooStream.flush();
-                }
-                catch (IOException ex)
-                {
-                    Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                return;
-            }
             
             //open file
             //read it
