@@ -23,6 +23,9 @@ public class Properties
     public static String    COMMAND_COPY_FILE           = "cp";
     public static String    COMMAND_MOVE_FILE           = "mv";
     
+    //Comandos para o servico de diretoria
+    public static String    COMMAND_HEARTBEAT           = "hearbeat_cliente";
+    
     public static Integer   ERROR_ALREADY_REGISTERED    = 1001;
     public static Integer   ERROR_ACCOUNT_NOT_FOUND     = 1002;
     public static Integer   ERROR_WRONG_PASSWORD        = 1003;
