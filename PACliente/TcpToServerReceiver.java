@@ -195,14 +195,10 @@ class TcpToServerReceiver implements Runnable
             try
             {
                 output_type = (Integer)oiStream.readObject();
-                if(output_type.equals(Properties.ERROR_NOT_LOGGED))
-                    System.out.println("You are not logged yet.");
-                else if(output_type.equals(Properties.ERROR_WHEN_COPY_FILE))
-                    System.out.println("You are on root folder.");
-                else if(output_type.equals(Properties.ERROR_MISSING_PARAMS))
-                    System.out.println("Missing parameters. cp [source] [destination]");
+                if(output_type.equals(Properties.ERROR_WHEN_COPY_FILE))
+                    System.out.println("Error when copy file.");
                 else if(output_type.equals(Properties.SUCCESS_WHEN_COPY_FILE))
-                    System.out.println("Yu moved to another folder.");
+                    System.out.println("File successfully copied!.");
             } 
             catch (IOException | ClassNotFoundException ex)
             {
@@ -215,9 +211,7 @@ class TcpToServerReceiver implements Runnable
             try
             {
                 output_type = (Integer)oiStream.readObject();
-                if(output_type.equals(Properties.ERROR_NOT_LOGGED))
-                    System.out.println("You are not logged yet.");
-                else if(output_type.equals(Properties.ERROR_WHEN_MOVE_FILE))
+                if(output_type.equals(Properties.ERROR_WHEN_MOVE_FILE))
                     System.out.println("You are on root folder.");
                 else if(output_type.equals(Properties.SUCCESS_WHEN_MOVE_FILE))
                     System.out.println("Yu moved to another folder.");

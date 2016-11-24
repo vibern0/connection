@@ -1,5 +1,6 @@
 
 
+import java.io.File;
 import paservidor.Properties;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,6 +9,7 @@ import java.io.ObjectOutputStream;
 import java.io.ObjectStreamException;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
@@ -79,7 +81,8 @@ public class TcpServerHandleClient implements Runnable {
     public void runCommand(String command, ObjectOutputStream ooStream)
             throws ObjectStreamException, FileAlreadyExistsException,
                 SecurityException, UnsupportedOperationException,
-                NotDirectoryException, IOException
+                NotDirectoryException, DirectoryNotEmptyException,
+                UnsupportedOperationException, IOException
     {
         if(command.equals(Properties.COMMAND_DISCONNECT))
             return;
@@ -166,59 +169,96 @@ public class TcpServerHandleClient implements Runnable {
             ArrayList<String> content = new ArrayList<>();
             Path currentRelativePath = Paths.get("");
             String path = currentRelativePath.toAbsolutePath().toString();
-            Path dir = currentRelativePath;
             
-            if(params[1].equals(".."))
+            String [] moves = params[1].split("/");
+            boolean success = true;
+            
+            for(String move : moves)
             {
-                if(current_folder.equals("/"))
+                if(move.equals(".."))
                 {
-                    ooStream.writeObject(Properties.COMMAND_CHANGE_DIRECTORY);
-                    ooStream.writeObject(Properties.ERROR_ON_ROOT_FOLDER);
-                    ooStream.flush();
+                    if(current_folder.equals("/"))
+                    {
+                        success = false;
+                        break;
+                    }
+                    else
+                    {
+                        String opath = current_folder.substring(0, current_folder.length()-1);
+                        int last = opath.lastIndexOf("/");
+                        current_folder = current_folder.substring(0, last + 1);
+                    }
                 }
-                else
+                else 
                 {
-                    String opath = current_folder.substring(0, current_folder.length()-1);
-                    int last = opath.lastIndexOf("/");
-                    current_folder = current_folder.substring(0, last + 1);
-                    
-                    dir = Paths.get(path + current_folder);
+                    current_folder += move + "/";
+                }   
+
+                if (!Files.exists(Paths.get(path + current_folder)))
+                {
+                    success = false;
+                    break;
                 }
             }
-            else 
-            {
-                current_folder += params[1] + "/";
-                dir = Paths.get(path + current_folder);
-            }   
             
-            if (Files.exists(dir))
+            ooStream.writeObject(Properties.COMMAND_CHANGE_DIRECTORY);
+            if(!success)
             {
-                ooStream.writeObject(Properties.COMMAND_CHANGE_DIRECTORY);
+                ooStream.writeObject(Properties.ERROR_ON_ROOT_FOLDER);
+            }
+            else
+            {
                 ooStream.writeObject(Properties.SUCCESS_CHANGE_DIRECTORY);
-                ooStream.flush();
             }
+            ooStream.flush();
         }
         else if(command.startsWith(Properties.COMMAND_COPY_FILE))
         {
             String [] params = command.split(" ");
             
-            //open file
-            //read it
-            //write in new place
+            Path currentRelativePath = Paths.get("");
+            String path = currentRelativePath.toAbsolutePath().toString();
             
-            //send a message saying if it was successfully copied or an error
-            //occurred
+            Path source = Paths.get(path + current_folder + params[1]);
+            Path newdir = Paths.get(path + current_folder + params[2] + "/" + params[1]);
+            Path ret = Files.copy(source, newdir);
+            
+            if(ret == null)
+            {
+                ooStream.writeObject(Properties.COMMAND_COPY_FILE);
+                ooStream.writeObject(Properties.ERROR_WHEN_COPY_FILE);
+                ooStream.flush();  
+            }
+            else
+            {
+                ooStream.writeObject(Properties.COMMAND_COPY_FILE);
+                ooStream.writeObject(Properties.SUCCESS_WHEN_COPY_FILE);
+                ooStream.flush();  
+            }
         }
         else if(command.startsWith(Properties.COMMAND_MOVE_FILE))
         {
             String [] params = command.split(" ");
             
-            //open file
-            //read it
-            //write in new place
+            Path currentRelativePath = Paths.get("");
+            String path = currentRelativePath.toAbsolutePath().toString();
             
-            //send a message saying if it was successfully copied or an error
-            //occurred
+            Path source = Paths.get(path + current_folder + params[1]);
+            Path newdir = Paths.get(path + current_folder + params[2] + "/" + params[1]);
+            Path ret = Files.move(source, newdir);
+            
+            if(ret == null)
+            {
+                ooStream.writeObject(Properties.COMMAND_MOVE_FILE);
+                ooStream.writeObject(Properties.ERROR_WHEN_MOVE_FILE);
+                ooStream.flush();  
+            }
+            else
+            {
+                ooStream.writeObject(Properties.COMMAND_MOVE_FILE);
+                ooStream.writeObject(Properties.SUCCESS_WHEN_MOVE_FILE);
+                ooStream.flush();  
+            }
         }
     }
 }
