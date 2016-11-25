@@ -11,6 +11,10 @@ public class PADiretoria
     static String cmd;
     
     public static void main(String[] args) throws Exception {
+        
+        Thread thread_servers = new Thread(new UdpServers(5009));
+        thread_servers.start();
+        
 //        int mcPort = 12345;
 //        String mcIPStr = "230.1.1.1";
 //        DatagramSocket udpSocket = new DatagramSocket();
@@ -28,7 +32,7 @@ public class PADiretoria
 //        System.out.println("Exiting application");
 //        udpSocket.close();
         
-        UdpServer udpS = new UdpServer(6000, true);
+        UdpClients udpS = new UdpClients(6000, true);
          
         
         while(true){
