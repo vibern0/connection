@@ -78,7 +78,10 @@ class TcpToServerReceiver implements Runnable
             Integer output_type;
             output_type = (Integer)oiStream.readObject();
             if(output_type.equals(Properties.SUCCESS_LOGGED))
+            {
+                Properties.LOGGED = true;
                 System.out.println("You are logged now.");
+            }
             else if(output_type.equals(Properties.ERROR_WRONG_PASSWORD))
                 System.out.println("Erong login password.");
             else if(output_type.equals(Properties.ERROR_ACCOUNT_NOT_FOUND))
@@ -122,7 +125,7 @@ class TcpToServerReceiver implements Runnable
             if(output_type.equals(Properties.ERROR_ON_ROOT_FOLDER))
                 System.out.println("You are on root folder.");
             else if(output_type.equals(Properties.SUCCESS_CHANGE_DIRECTORY))
-                System.out.println("Yu moved to another folder.");
+                System.out.println("You moved to another folder.");
         }
         else if(command.equals(Properties.COMMAND_COPY_FILE))
         {
@@ -138,9 +141,18 @@ class TcpToServerReceiver implements Runnable
             Integer output_type;
             output_type = (Integer)oiStream.readObject();
             if(output_type.equals(Properties.ERROR_WHEN_MOVE_FILE))
-                System.out.println("You are on root folder.");
+                System.out.println("Error moving file.");
             else if(output_type.equals(Properties.SUCCESS_WHEN_MOVE_FILE))
-                System.out.println("Yu moved to another folder.");
+                System.out.println("You moved the file.");
+        }
+        else if(command.equals(Properties.COMMAND_REMOVE_FILE))
+        {
+            Integer output_type;
+            output_type = (Integer)oiStream.readObject();
+            if(output_type.equals(Properties.ERROR_WHEN_REMOVE_FILE))
+                System.out.println("Error removing file.");
+            else if(output_type.equals(Properties.SUCCESS_WHEN_REMOVE_FILE))
+                System.out.println("Success removing file.");
         }
     }
 }

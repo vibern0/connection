@@ -1,5 +1,6 @@
 
 
+import java.io.File;
 import paservidor.Properties;
 import java.io.IOException;
 import java.io.InputStream;
@@ -251,6 +252,38 @@ public class TcpServerHandleClient implements Runnable {
             else
             {
                 ooStream.writeObject(Properties.SUCCESS_WHEN_MOVE_FILE);
+            }
+            ooStream.flush();
+        }
+        else if(command.startsWith(Properties.COMMAND_REMOVE_FILE))
+        {
+            String [] params = command.split(" ");
+            
+            Path currentRelativePath = Paths.get("");
+            String path = currentRelativePath.toAbsolutePath().toString();
+            
+            File file = new File(path + current_folder + params[1]);
+            ooStream.writeObject(Properties.COMMAND_REMOVE_FILE);
+            if(!file.exists())
+            {
+                ooStream.writeObject(Properties.ERROR_WHEN_REMOVE_FILE);
+            }
+            else if(file.isDirectory())
+            {
+                if(file.list().length == 0)
+                {
+                    file.delete();
+                    ooStream.writeObject(Properties.SUCCESS_WHEN_REMOVE_FILE);
+                }
+                else
+                {
+                    ooStream.writeObject(Properties.ERROR_WHEN_REMOVE_FILE);
+                }
+            }
+            else
+            {
+                ooStream.writeObject(Properties.SUCCESS_WHEN_REMOVE_FILE);
+                file.delete();
             }
             ooStream.flush();
         }
