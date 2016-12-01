@@ -1,6 +1,9 @@
 
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import paservidor.Properties;
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,13 +40,17 @@ public class TcpServerHandleClient implements Runnable {
     private String current_folder;
     private final Database database;
     private boolean logged;
+    private final OutputStream oStream;
+    private final InputStream iStream;
     
-    public TcpServerHandleClient(Socket socket)
+    public TcpServerHandleClient(Socket socket) throws IOException
     {
         this.socket = socket;
         this.current_folder = "/";
         this.database = new Database();
         this.logged = false;
+        this.oStream = socket.getOutputStream();
+        this.iStream = socket.getInputStream();
     }
     
     @Override
@@ -54,8 +61,7 @@ public class TcpServerHandleClient implements Runnable {
         {
             byte [] bytes = new byte[1024];
             String command;
-            OutputStream oStream = socket.getOutputStream();
-            InputStream iStream = socket.getInputStream();
+            //
             ObjectOutputStream ooStream = new ObjectOutputStream(oStream);
             ObjectInputStream oiStream = new ObjectInputStream(iStream);
             
@@ -286,6 +292,39 @@ public class TcpServerHandleClient implements Runnable {
                 file.delete();
             }
             ooStream.flush();
+        }
+        else if(command.startsWith(Properties.COMMAND_UPLOAD))
+        {
+            String [] params = command.split(" ");
+            
+            OutputStream out = null;
+            try
+            {
+                out = new FileOutputStream(params[1]);
+            }
+            catch (FileNotFoundException ex)
+            {
+                System.out.println("File not found. ");
+            }
+            
+            ooStream.writeObject(Properties.COMMAND_UPLOAD);
+            if(out == null)
+            {
+                ooStream.writeObject(Properties.ERROR_UPLOAD_FILE);
+            }
+            else
+            {
+                ooStream.writeObject(Properties.SUCCESS_UPLOAD_FILE);
+                ooStream.writeObject(params[1]);
+                byte[] bytes = new byte[1024];
+
+                int count;
+                while ((count = iStream.read(bytes)) > 0)
+                {
+                    out.write(bytes, 0, count);
+                }
+                out.close();
+            }
         }
     }
 }

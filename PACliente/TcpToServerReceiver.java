@@ -1,9 +1,15 @@
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import pacliente.Properties;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectStreamException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -153,6 +159,31 @@ class TcpToServerReceiver implements Runnable
                 System.out.println("Error removing file.");
             else if(output_type.equals(Properties.SUCCESS_WHEN_REMOVE_FILE))
                 System.out.println("Success removing file.");
+        }
+        else if(command.equals(Properties.COMMAND_UPLOAD))
+        {
+            //começar copiar
+            //terminou copiar
+            Integer output_type;
+            output_type = (Integer)oiStream.readObject();
+            if(output_type.equals(Properties.ERROR_UPLOAD_FILE))
+            {
+                System.out.println("Error uploading file.");
+            }
+            else if(output_type.equals(Properties.SUCCESS_UPLOAD_FILE))
+            {
+                File file = new File("/home/bernardovieira/NetBeansProjects/PACliente/" + (String)oiStream.readObject());
+                // Get the size of the file
+                byte[] bytes = new byte[1024];
+                InputStream in = new FileInputStream(file);
+
+                int count;
+                while ((count = in.read(bytes)) > 0) {
+                    TcpToServer.oStream.write(bytes, 0, count);
+                }
+                System.out.println("File uploaded.");
+                in.close();
+            }
         }
     }
 }

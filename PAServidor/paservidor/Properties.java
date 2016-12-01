@@ -23,6 +23,7 @@ public class Properties
     public static String    COMMAND_COPY_FILE           = "cp";
     public static String    COMMAND_MOVE_FILE           = "mv";
     public static String    COMMAND_REMOVE_FILE         = "rm";
+    public static String    COMMAND_UPLOAD              = "upload";
     
     public static Integer   ERROR_ALREADY_REGISTERED    = 1001;
     public static Integer   ERROR_ACCOUNT_NOT_FOUND     = 1002;
@@ -34,6 +35,7 @@ public class Properties
     public static Integer   ERROR_WHEN_COPY_FILE        = 1008;
     public static Integer   ERROR_WHEN_MOVE_FILE        = 1009;
     public static Integer   ERROR_WHEN_REMOVE_FILE      = 1010;
+    public static Integer   ERROR_UPLOAD_FILE             = 1011;
     
     public static Integer   SUCCESS_REGISTER            = 2001;
     public static Integer   SUCCESS_LOGGED              = 2002;
@@ -44,4 +46,5 @@ public class Properties
     public static Integer   SUCCESS_WHEN_COPY_FILE      = 2007;
     public static Integer   SUCCESS_WHEN_MOVE_FILE      = 2008;
     public static Integer   SUCCESS_WHEN_REMOVE_FILE    = 2009;
+    public static Integer   SUCCESS_UPLOAD_FILE           = 2010;
 }

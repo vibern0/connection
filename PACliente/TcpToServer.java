@@ -15,6 +15,7 @@ public class TcpToServer
 {
     private Socket socket;
     private Map<String, Integer> params;
+    public static OutputStream oStream;
 
     public TcpToServer(String hostname, int port)
     {
@@ -27,7 +28,7 @@ public class TcpToServer
             Scanner sc;
             String cmd;
             
-            OutputStream oStream = this.socket.getOutputStream();
+            oStream = this.socket.getOutputStream();
             ObjectOutputStream ooStream = new ObjectOutputStream(oStream);
             
             TcpToServerReceiver tcpconn = new TcpToServerReceiver(socket);
@@ -68,6 +69,7 @@ public class TcpToServer
         params.put(Properties.COMMAND_COPY_FILE,        2);
         params.put(Properties.COMMAND_MOVE_FILE,        2);
         params.put(Properties.COMMAND_REMOVE_FILE,      1);
+        params.put(Properties.COMMAND_UPLOAD,           1);
     }
     
     private void checkCommand(ObjectOutputStream ooStream, String command) throws IOException
