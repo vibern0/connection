@@ -1,5 +1,9 @@
 
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import paservidor.Properties;
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,13 +40,17 @@ public class TcpServerHandleClient implements Runnable {
     private String current_folder;
     private final Database database;
     private boolean logged;
+    private final OutputStream oStream;
+    private final InputStream iStream;
     
-    public TcpServerHandleClient(Socket socket)
+    public TcpServerHandleClient(Socket socket) throws IOException
     {
         this.socket = socket;
         this.current_folder = "/";
         this.database = new Database();
         this.logged = false;
+        this.oStream = socket.getOutputStream();
+        this.iStream = socket.getInputStream();
     }
     
     @Override
@@ -53,8 +61,7 @@ public class TcpServerHandleClient implements Runnable {
         {
             byte [] bytes = new byte[1024];
             String command;
-            OutputStream oStream = socket.getOutputStream();
-            InputStream iStream = socket.getInputStream();
+            //
             ObjectOutputStream ooStream = new ObjectOutputStream(oStream);
             ObjectInputStream oiStream = new ObjectInputStream(iStream);
             
@@ -253,6 +260,98 @@ public class TcpServerHandleClient implements Runnable {
                 ooStream.writeObject(Properties.SUCCESS_WHEN_MOVE_FILE);
             }
             ooStream.flush();
+        }
+        else if(command.startsWith(Properties.COMMAND_REMOVE_FILE))
+        {
+            String [] params = command.split(" ");
+            
+            Path currentRelativePath = Paths.get("");
+            String path = currentRelativePath.toAbsolutePath().toString();
+            
+            File file = new File(path + current_folder + params[1]);
+            ooStream.writeObject(Properties.COMMAND_REMOVE_FILE);
+            if(!file.exists())
+            {
+                ooStream.writeObject(Properties.ERROR_WHEN_REMOVE_FILE);
+            }
+            else if(file.isDirectory())
+            {
+                if(file.list().length == 0)
+                {
+                    file.delete();
+                    ooStream.writeObject(Properties.SUCCESS_WHEN_REMOVE_FILE);
+                }
+                else
+                {
+                    ooStream.writeObject(Properties.ERROR_WHEN_REMOVE_FILE);
+                }
+            }
+            else
+            {
+                ooStream.writeObject(Properties.SUCCESS_WHEN_REMOVE_FILE);
+                file.delete();
+            }
+            ooStream.flush();
+        }
+        else if(command.startsWith(Properties.COMMAND_UPLOAD))
+        {
+            String [] params = command.split(" ");
+            
+            OutputStream out = null;
+            try
+            {
+                out = new FileOutputStream(params[1]);
+            }
+            catch (FileNotFoundException ex)
+            {
+                System.out.println("File not found. ");
+            }
+            
+            ooStream.writeObject(Properties.COMMAND_UPLOAD);
+            if(out == null)
+            {
+                ooStream.writeObject(Properties.ERROR_UPLOAD_FILE);
+            }
+            else
+            {
+                ooStream.writeObject(Properties.SUCCESS_UPLOAD_FILE);
+                ooStream.writeObject(params[1]);
+                byte[] bytes = new byte[1024];
+
+                int count;
+                while ((count = iStream.read(bytes)) > 0)
+                {
+                    out.write(bytes, 0, count);
+                }
+                out.close();
+            }
+        }
+        else if(command.startsWith(Properties.COMMAND_DOWNLOAD))
+        {
+            String [] params = command.split(" ");
+            
+            ooStream.writeObject(Properties.COMMAND_DOWNLOAD);
+            
+            ooStream.writeObject(Properties.SUCCESS_DOWNLOAD_FILE);
+            ooStream.writeObject(params[1]);
+            
+            File file = new File(params[1]);
+            // Get the size of the file
+            long length = file.length();
+            byte[] bytes = new byte[1024];
+            InputStream in = new FileInputStream(file);
+
+            ooStream.writeObject((Long)length);
+            
+            int count;
+            while ((count = in.read(bytes)) > 0)
+            {
+                oStream.write(bytes, 0, count);
+                System.out.println("a");
+            }
+            
+            System.out.println("b");
+            in.close();
         }
     }
 }

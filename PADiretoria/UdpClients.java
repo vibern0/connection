@@ -4,7 +4,7 @@ import java.io.*;
 import java.time.LocalDateTime;
 import java.util.*;
 
-public class UdpServer {
+public class UdpClients {
 
     public static final int MAX_SIZE = 256;
     public static final String TIME_REQUEST = "TIME";
@@ -17,7 +17,7 @@ public class UdpServer {
     private List<Clientes> clientesOn = Collections.synchronizedList(new ArrayList<>());
     private Clientes infoCli;
 
-    public UdpServer(int listeningPort, boolean debug) throws SocketException {
+    public UdpClients(int listeningPort, boolean debug) throws SocketException {
         socket = null;
         packet = null;
         socket = new DatagramSocket(listeningPort);
