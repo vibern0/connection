@@ -70,6 +70,7 @@ public class TcpToServer
         params.put(Properties.COMMAND_MOVE_FILE,        2);
         params.put(Properties.COMMAND_REMOVE_FILE,      1);
         params.put(Properties.COMMAND_UPLOAD,           1);
+        params.put(Properties.COMMAND_DOWNLOAD,         1);
     }
     
     private void checkCommand(ObjectOutputStream ooStream, String command) throws IOException

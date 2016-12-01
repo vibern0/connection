@@ -326,5 +326,32 @@ public class TcpServerHandleClient implements Runnable {
                 out.close();
             }
         }
+        else if(command.startsWith(Properties.COMMAND_DOWNLOAD))
+        {
+            String [] params = command.split(" ");
+            
+            ooStream.writeObject(Properties.COMMAND_DOWNLOAD);
+            
+            ooStream.writeObject(Properties.SUCCESS_DOWNLOAD_FILE);
+            ooStream.writeObject(params[1]);
+            
+            File file = new File(params[1]);
+            // Get the size of the file
+            long length = file.length();
+            byte[] bytes = new byte[1024];
+            InputStream in = new FileInputStream(file);
+
+            ooStream.writeObject((Long)length);
+            
+            int count;
+            while ((count = in.read(bytes)) > 0)
+            {
+                oStream.write(bytes, 0, count);
+                System.out.println("a");
+            }
+            
+            System.out.println("b");
+            in.close();
+        }
     }
 }

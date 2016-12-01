@@ -28,6 +28,7 @@ import java.util.logging.Logger;
 class TcpToServerReceiver implements Runnable
 {
     private final Socket socket;
+    private InputStream iStream;
     
     public TcpToServerReceiver(Socket socket)
     {
@@ -41,7 +42,7 @@ class TcpToServerReceiver implements Runnable
         try
         {
             String cmd;
-            InputStream iStream = this.socket.getInputStream();
+            iStream = this.socket.getInputStream();
             ObjectInputStream oiStream = new ObjectInputStream(iStream);
             
             do
@@ -172,7 +173,7 @@ class TcpToServerReceiver implements Runnable
             }
             else if(output_type.equals(Properties.SUCCESS_UPLOAD_FILE))
             {
-                File file = new File("/home/bernardovieira/NetBeansProjects/PACliente/" + (String)oiStream.readObject());
+                File file = new File((String)oiStream.readObject());
                 // Get the size of the file
                 byte[] bytes = new byte[1024];
                 InputStream in = new FileInputStream(file);
@@ -183,6 +184,45 @@ class TcpToServerReceiver implements Runnable
                 }
                 System.out.println("File uploaded.");
                 in.close();
+            }
+        }
+        else if(command.equals(Properties.COMMAND_DOWNLOAD))
+        {
+            Integer output_type;
+            output_type = (Integer)oiStream.readObject();
+            
+            OutputStream out = null;
+            try
+            {
+                out = new FileOutputStream((String)oiStream.readObject());
+            }
+            catch (FileNotFoundException ex)
+            {
+                System.out.println("File not found. ");
+            }
+            
+            if(out == null)
+            {
+                System.out.println("Error creating file.");
+            }
+            else
+            {
+                byte[] bytes = new byte[1024];
+                
+                long length = (Long)oiStream.readObject();
+                long atual_length = 0;
+
+                int count;
+                while (atual_length < length)
+                {
+                    count = iStream.read(bytes);
+                    out.write(bytes, 0, count);
+                    System.out.println("a");
+                    atual_length += count;
+                }
+                System.out.println("b");
+                out.close();
+                System.out.println("File dowloaded. ");
             }
         }
     }
