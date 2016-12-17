@@ -28,9 +28,6 @@ public class Properties
     public static String    COMMAND_UPLOAD              = "upload";
     public static String    COMMAND_DOWNLOAD            = "download";
     
-    //Comandos para o servico de diretoria
-    public static String    COMMAND_HEARTBEAT           = "hearbeat_cliente";
-    
     public static Integer   ERROR_ALREADY_REGISTERED    = 1001;
     public static Integer   ERROR_ACCOUNT_NOT_FOUND     = 1002;
     public static Integer   ERROR_WRONG_PASSWORD        = 1003;
@@ -55,4 +52,11 @@ public class Properties
     public static Integer   SUCCESS_WHEN_REMOVE_FILE    = 2009;
     public static Integer   SUCCESS_UPLOAD_FILE         = 2010;
     public static Integer   SUCCESS_DOWNLOAD_FILE       = 2011;
+    
+    
+    
+    //Comandos para o servico de diretoria
+    public static String    COMMAND_HEARTBEAT           = "hearbeat_cliente";
+    public static final int MAX_DPACK_SIZE              = 256;
+    public static final int HEARTBEAT_TIME              = 4;
 }

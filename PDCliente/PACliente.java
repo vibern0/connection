@@ -1,19 +1,31 @@
-/*
-*
-*
-*
-*/
+
+import java.net.SocketException;
 
 public class PACliente
 {
     public static void main(String[] args){
         
+        if(args.length < 2)
+        {
+            System.out.println("Incompleto! Parametros -> [ip UDP] [porto UDP]");
+            return;
+        }
         
-        //TcpToServer tcpClient = new TcpToServer("127.0.0.1", 5007);
+        UdpClient udpClient;
+        try
+        {
+            udpClient = new UdpClient();
+            System.out.println("UDP iniciado no porto " + udpClient.getPort());
+            udpClient.start();
+        }
+        catch (SocketException ex)
+        {
+            ex.printStackTrace();
+            System.out.println("Erro ao iniciar UDP!");
+            return;
+        }
         
-        Thread hb = new HeartbeatClient("localhost", 5008);
-        
-        hb.start();
+        new HeartbeatClient(udpClient.getSocket(), args[0], Integer.parseInt(args[1])).run();
         
     }
 }
