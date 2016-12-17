@@ -22,7 +22,7 @@ public class RMIclient {
     
     public RMIclient()
     { }
-    public void run(String serviceLocalization, String rootDiectory, String wantedFile)
+    public void run(String serviceLocalization, String serverName)
     {
         
         String objectUrl;        
@@ -39,34 +39,10 @@ public class RMIclient {
          * Trata os argumentos da linha de comando 
          */        
 
-        objectUrl = "rmi://"+serviceLocalization+"/GetRemoteFile";        
-        localDirectory = new File(rootDiectory.trim());
-        fileName = wantedFile.trim();
-                
-        if(!localDirectory.exists()){
-            System.out.println("A directoria " + localDirectory + " nao existe!");
-            return;
-        }
+        objectUrl = "rmi://"+serviceLocalization+"/GetRemoteFile";   
         
-        if(!localDirectory.isDirectory()){
-            System.out.println("O caminho " + localDirectory + " nao se refere a uma directoria!");
-            return;
-        }
-        if(!localDirectory.canWrite()){
-            System.out.println("Sem permissoes de escrita na directoria " + localDirectory);
-            return;
-        }
-               
         try{
-            
-            /*
-             * Cria o ficheiro local
-             */ 
-            localFilePath = new File(localDirectory.getPath()+File.separator+fileName).getCanonicalPath();
-            localFileOutputStream = new FileOutputStream(localFilePath);
-            
-            System.out.println("Ficheiro " + localFilePath + " criado.");
-                        
+                 
             /*
              * Obtem a referencia remota para o servico com nome "GetRemoteFile"
              */
@@ -75,21 +51,18 @@ public class RMIclient {
             /*
              * Lanca o servico local para acesso remoto por parte do servidor.
              */
-            myRemoteService = new GetRemoteFileClient();
+            //myRemoteService = new GetRemoteFileClient();
             
             /*
              * Passa ao servico local uma referencia para o objecto localFileOutputStream
              */
-            myRemoteService.setFout(localFileOutputStream);
+            //myRemoteService.setFout(localFileOutputStream);
             
             /*
              * Obtem o ficheiro pretendido, invocando o metodo getFile no servico remoto.
              */            
-            if(remoteFileService.getFile(fileName, myRemoteService)){
-                System.out.println("Transferencia do ficheiro " + fileName + " concluida com sucesso.");
-            }else{
-                System.out.println("Transferencia do ficheiro " + fileName + " concluida SEM sucesso.");
-            }            
+            remoteFileService.connect(serverName);
+            System.out.println("Conectado por RMI!");
                         
         }catch(RemoteException e){
             System.out.println("Erro remoto - " + e);
@@ -100,27 +73,13 @@ public class RMIclient {
         }catch(Exception e){
             System.out.println("Erro - " + e);
         }finally{
-            if(localFileOutputStream != null){
-                /*
-                 * Encerra o ficheiro.
-                 */
-                try{
-                    localFileOutputStream.close();
-                }catch(IOException e){}
-            }
             
-            if(myRemoteService != null){
-                /*
-                  * Retira do servico local a referencia para o objecto localFileOutputStream
-                  */
+            /*if(myRemoteService != null){
                 myRemoteService.setFout(null);
-                /*
-                 * Termina o servi�o local
-                 */
                 try{
                     UnicastRemoteObject.unexportObject(myRemoteService, true);
                 }catch(NoSuchObjectException e){}
-            }
+            }*/
         }
     }
 }

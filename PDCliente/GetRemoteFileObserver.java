@@ -10,6 +10,7 @@ public class GetRemoteFileObserver extends UnicastRemoteObject implements GetRem
     
     public GetRemoteFileObserver() throws RemoteException {}
 
+    @Override
     public void notifyNewOperationConcluded(String description) throws RemoteException
     {
         System.out.print(description);

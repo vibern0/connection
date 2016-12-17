@@ -20,7 +20,7 @@ public class GetRemoteFileClient extends UnicastRemoteObject implements GetRemot
         fout = null;
     }
     
-     public boolean writeFileChunk(byte [] fileChunk, int nbytes) throws RemoteException
+     /*public boolean writeFileChunk(byte [] fileChunk, int nbytes) throws RemoteException
      {
         if(fout == null){
             System.out.println("Nao existe qualquer ficheiro aberto para escrita!");
@@ -39,5 +39,5 @@ public class GetRemoteFileClient extends UnicastRemoteObject implements GetRemot
 
     public void setFout(FileOutputStream fout) {
         this.fout = fout;
-    }
+    }*/
 }

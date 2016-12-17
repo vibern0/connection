@@ -25,6 +25,6 @@ public class PAServidor
             return;
         }
         
-        new RMIclient().run(args[1], "./", "giphy.gif");
+        new RMIclient().run(args[1], args[0]);
     }
 }
