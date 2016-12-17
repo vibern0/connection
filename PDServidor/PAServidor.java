@@ -1,5 +1,8 @@
 
+import java.io.IOException;
 import java.net.SocketException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class PAServidor
 {
@@ -25,6 +28,16 @@ public class PAServidor
             return;
         }
         
-        new RMIclient().run(args[1], args[0]);
+        RMIclient rmi = new RMIclient(args[0]);
+        rmi.run(args[1]);
+        
+        System.out.println("<Enter> para terminar...");
+        try
+        {
+            System.in.read();
+        }
+        catch (IOException ex) { }
+        rmi.close();
+        System.exit(0);
     }
 }

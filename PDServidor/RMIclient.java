@@ -7,6 +7,8 @@ import java.rmi.NoSuchObjectException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -20,20 +22,18 @@ import java.rmi.server.UnicastRemoteObject;
  */
 public class RMIclient {
     
-    public RMIclient()
-    { }
-    public void run(String serviceLocalization, String serverName)
+    private GetRemoteFileServiceInterface remoteFileService;
+    private final String serverName;
+    
+    public RMIclient(String serverName)
+    {
+        this.serverName = serverName;
+    }
+    public void run(String serviceLocalization)
     {
         
         String objectUrl;        
-        File localDirectory;
-        String fileName;                
         
-        String localFilePath;
-        FileOutputStream localFileOutputStream = null;     
-        
-        GetRemoteFileClient myRemoteService = null;
-        GetRemoteFileServiceInterface remoteFileService;
                
         /*
          * Trata os argumentos da linha de comando 
@@ -70,8 +70,6 @@ public class RMIclient {
             System.out.println("Servico remoto desconhecido - " + e);
         }catch(IOException e){
             System.out.println("Erro E/S - " + e);
-        }catch(Exception e){
-            System.out.println("Erro - " + e);
         }finally{
             
             /*if(myRemoteService != null){
@@ -80,6 +78,14 @@ public class RMIclient {
                     UnicastRemoteObject.unexportObject(myRemoteService, true);
                 }catch(NoSuchObjectException e){}
             }*/
+        }
+    }
+    public void close()
+    {
+        try {
+            remoteFileService.disconnect(serverName);
+        } catch (RemoteException ex) {
+            Logger.getLogger(RMIclient.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }

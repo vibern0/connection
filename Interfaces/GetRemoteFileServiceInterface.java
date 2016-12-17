@@ -8,6 +8,7 @@ public interface GetRemoteFileServiceInterface extends java.rmi.Remote
     //public boolean getFile(String fileName, GetRemoteFileClientInterface cli) throws java.rmi.RemoteException;
     
     public void connect(String serverName) throws java.rmi.RemoteException;
+    public void disconnect(String serverName) throws java.rmi.RemoteException;
     
     public void addObserver(GetRemoteFileObserverInterface observer) throws java.rmi.RemoteException;
     public void removeObserver(GetRemoteFileObserverInterface observer) throws java.rmi.RemoteException;    

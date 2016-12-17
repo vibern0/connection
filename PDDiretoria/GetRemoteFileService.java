@@ -42,6 +42,12 @@ public class GetRemoteFileService  extends UnicastRemoteObject implements GetRem
     }
     
     @Override
+    public void disconnect(String serverName) throws java.rmi.RemoteException
+    {
+        notifyObservers("O servidor " + serverName + " desconectou-se!");
+    }
+    
+    @Override
     public synchronized void addObserver(GetRemoteFileObserverInterface observer) throws java.rmi.RemoteException
     {
         if(!observers.contains(observer)){
