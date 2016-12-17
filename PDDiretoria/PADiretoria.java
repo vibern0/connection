@@ -42,5 +42,7 @@ public class PADiretoria
             System.out.println("Erro ao iniciar UDP de escuta para clientes!");
             return;
         }
+        
+        new RMIservice().run("./");
     }
 }

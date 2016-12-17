@@ -27,5 +27,7 @@ public class PACliente
         
         new HeartbeatClient(udpClient.getSocket(), args[0], Integer.parseInt(args[1])).run();
         
+        new RMIobserver().run(args[0]);
+        
     }
 }

@@ -24,5 +24,7 @@ public class PAServidor
             //fechar tcp!
             return;
         }
+        
+        new RMIclient().run(args[1], "./", "giphy.gif");
     }
 }
