@@ -13,7 +13,7 @@ public class GetRemoteFileObserver extends UnicastRemoteObject implements GetRem
     @Override
     public void notifyNewOperationConcluded(String description) throws RemoteException
     {
-        System.out.print(description);
+        System.out.println(description);
     }
     
 }

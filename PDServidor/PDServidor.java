@@ -1,10 +1,12 @@
 
 import java.io.IOException;
 import java.net.SocketException;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class PAServidor
+public class PDServidor
 {
     public static void main(String[] args)
     {
@@ -28,8 +30,23 @@ public class PAServidor
             return;
         }
         
-        RMIclient rmi = new RMIclient(args[0]);
-        rmi.run(args[1]);
+        RMI rmi = new RMI(args[0]);
+        try
+        {
+            rmi.run(args[1]);
+        }
+        catch(RemoteException e)
+        {
+            System.out.println("Erro remoto - " + e);
+        }
+        catch(NotBoundException e)
+        {
+            System.out.println("Servico remoto desconhecido - " + e);
+        }
+        catch(IOException e)
+        {
+            System.out.println("Erro E/S - " + e);
+        }
         
         System.out.println("<Enter> para terminar...");
         try
@@ -37,7 +54,14 @@ public class PAServidor
             System.in.read();
         }
         catch (IOException ex) { }
-        rmi.close();
+        try
+        {
+            rmi.close();
+        }
+        catch (RemoteException ex)
+        {
+            System.out.println("Erro remoto - " + ex);
+        }
         System.exit(0);
     }
 }
