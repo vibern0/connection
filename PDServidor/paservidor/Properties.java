@@ -50,4 +50,7 @@ public class Properties
     public static Integer   SUCCESS_WHEN_REMOVE_FILE    = 2009;
     public static Integer   SUCCESS_UPLOAD_FILE         = 2010;
     public static Integer   SUCCESS_DOWNLOAD_FILE       = 2011;
+    
+    public static String    COMMAND_HEARTBEAT           = "heartbeat_server";
+    public static int       HEARTBEAT_TIME              = 4;
 }

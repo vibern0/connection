@@ -17,5 +17,6 @@ public class Constants {
     
     
     public static String    HEARTBEAT_CLIENT        = "hearbeat_cliente";
+    public static String    HEARTBEAT_SERVER        = "heartbeat_server";
     
 }
