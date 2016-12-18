@@ -1,8 +1,6 @@
 import java.io.*;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.rmi.registry.Registry;
-import java.rmi.registry.LocateRegistry;
 import static java.rmi.server.RemoteServer.getClientHost;
 import java.rmi.server.ServerNotActiveException;
 import java.util.ArrayList;
@@ -14,17 +12,14 @@ import java.util.logging.Logger;
  *
  * @author Jose'
  */
-public class RemoteService  extends UnicastRemoteObject implements RemoteServiceInterface
+public class RemoteService  extends UnicastRemoteObject
+        implements RemoteServiceInterface
 {
     public static final String SERVICE_NAME = "GetRemoteFile";
-    
-    List<GetRemoteFileObserverInterface> observers;
-    
-    protected File localDirectory;    
+    List<RemoteObserverInterface> observers;
     
     public RemoteService(File localDirectory) throws RemoteException 
     {
-        this.localDirectory = localDirectory;
         observers = new ArrayList<>();
     }
     
@@ -48,7 +43,7 @@ public class RemoteService  extends UnicastRemoteObject implements RemoteService
     }
     
     @Override
-    public synchronized void addObserver(GetRemoteFileObserverInterface observer) throws java.rmi.RemoteException
+    public synchronized void addObserver(RemoteObserverInterface observer) throws java.rmi.RemoteException
     {
         if(!observers.contains(observer)){
             observers.add(observer);
@@ -58,7 +53,7 @@ public class RemoteService  extends UnicastRemoteObject implements RemoteService
     }
     
     @Override
-    public synchronized void removeObserver(GetRemoteFileObserverInterface observer) throws java.rmi.RemoteException
+    public synchronized void removeObserver(RemoteObserverInterface observer) throws java.rmi.RemoteException
     {
         if(observers.remove(observer))
             System.out.println("- um observador.");

@@ -1,14 +1,11 @@
+
 import java.rmi.*;
 import java.rmi.server.*;
 
-/**
- *
- * @author Jose'
- */
-public class GetRemoteFileObserver extends UnicastRemoteObject implements GetRemoteFileObserverInterface
+public class RemoteObserver extends UnicastRemoteObject implements RemoteObserverInterface
 {
     
-    public GetRemoteFileObserver() throws RemoteException {}
+    public RemoteObserver() throws RemoteException {}
 
     @Override
     public void notifyNewOperationConcluded(String description) throws RemoteException
