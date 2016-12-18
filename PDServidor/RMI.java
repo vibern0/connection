@@ -7,11 +7,11 @@ import java.rmi.RemoteException;
 public class RMI {
     
     private RemoteServiceInterface remoteService;
-    private final String serverName;
+    private final RemoteClient remoteClient;
     
-    public RMI(String serverName)
+    public RMI(String serverName) throws RemoteException
     {
-        this.serverName = serverName;
+        this.remoteClient = new RemoteClient(serverName);
     }
     public void run(String serviceLocalization)
             throws NotBoundException, MalformedURLException, RemoteException
@@ -19,11 +19,11 @@ public class RMI {
         String objectUrl;
         objectUrl = "rmi://"+serviceLocalization+"/GetRemoteFile"; 
         remoteService = (RemoteServiceInterface)Naming.lookup(objectUrl);
-        remoteService.connect(serverName);
+        remoteService.addServer(remoteClient);
         System.out.println("Conectado por RMI!");  
     }
     public void close() throws RemoteException
     {
-        remoteService.disconnect(serverName);
+        remoteService.removeServer(remoteClient);
     }
 }

@@ -11,27 +11,31 @@ public class RemoteService  extends UnicastRemoteObject
 {
     public static final String SERVICE_NAME = "GetRemoteFile";
     List<RemoteObserverInterface> observers;
+    List<RemoteClientInterface> servers;
     
     public RemoteService(File localDirectory) throws RemoteException 
     {
         observers = new ArrayList<>();
+        servers = new ArrayList<>();
     }
     
     @Override
-    public void connect(String serverName) throws java.rmi.RemoteException
+    public void addServer(RemoteClientInterface server) throws java.rmi.RemoteException
     {
         try
         {
-            notifyObservers("O servidor " + serverName +
+            notifyObservers("O servidor " + server.getName() +
                     " conectou-se desde " + getClientHost());
+            servers.add(server);
         }
         catch (ServerNotActiveException ex) { }
     }
     
     @Override
-    public void disconnect(String serverName) throws java.rmi.RemoteException
+    public void removeServer(RemoteClientInterface server) throws java.rmi.RemoteException
     {
-        notifyObservers("O servidor " + serverName + " desconectou-se!");
+        notifyObservers("O servidor " + server.getName() + " desconectou-se!");
+        servers.remove(server);
     }
     
     @Override

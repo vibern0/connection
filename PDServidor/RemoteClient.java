@@ -2,10 +2,19 @@
 import java.rmi.*;
 import java.rmi.server.UnicastRemoteObject;
 
-public class RemoteClient extends UnicastRemoteObject implements RemoteClientInterface
+public class RemoteClient extends UnicastRemoteObject
+        implements RemoteClientInterface
 {
-    public RemoteClient() throws RemoteException
+    private final String serverName;
+    public RemoteClient(String serverName) throws RemoteException
     {
         //
+        this.serverName = serverName;
+    }
+
+    @Override
+    public String getName() throws RemoteException
+    {
+        return serverName;
     }
 }

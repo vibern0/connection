@@ -1,9 +1,9 @@
 
 public interface RemoteServiceInterface extends java.rmi.Remote
 {
-    public void connect(String serverName)
+    public void addServer(RemoteClientInterface server)
             throws java.rmi.RemoteException;
-    public void disconnect(String serverName)
+    public void removeServer(RemoteClientInterface server)
             throws java.rmi.RemoteException;
 
     public void addObserver(RemoteObserverInterface observer)
