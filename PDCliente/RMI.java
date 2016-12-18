@@ -7,6 +7,8 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class RMI {
     
@@ -40,6 +42,13 @@ public class RMI {
         }
         //
         return values;
+    }
+    
+    public void connectToServer(String serverName) throws RemoteException
+    {
+        RemoteClientInterface server =
+                remoteService.searchServerByName(serverName);
+        server.connectUser(observer);
     }
     
     public void close() throws NoSuchObjectException, RemoteException

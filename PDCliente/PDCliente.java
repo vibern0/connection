@@ -4,6 +4,7 @@ import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import pacliente.Properties;
@@ -13,6 +14,7 @@ public class PDCliente
     private static TcpToServer tcpToServer;
     private static UdpClient udpClient;
     private static RMI rmi;
+    private static List<String> connectedToServers;
     public static void main(String[] args)
     {    
         if(args.length < 3)
@@ -21,6 +23,7 @@ public class PDCliente
             return;
         }
         
+        connectedToServers = new ArrayList<>();
         try
         {
             udpClient = new UdpClient(args[0], Integer.parseInt(args[1]));
@@ -99,10 +102,39 @@ public class PDCliente
                         System.out.println(name);
                     }
                 }
-                
-                
-                
-                udpClient.sendCommand(command);
+                else if(command.startsWith(Properties.CONNECT_TO_SERVER))
+                {
+                    String [] params = command.split(" ");
+                    if(connectedToServers.contains(params[1]))
+                    {
+                        System.out.println("Ja esta conectado a esse servidor!");
+                        return;
+                    }
+                    //connectar ao servidor
+                    List<String> servers = rmi.getAllServersName();
+                    if(!servers.contains(params[1]))
+                    {
+                        System.out.println("Servidor nao encontrado!");
+                        return;
+                    }
+                    //
+                    if(connectedToServers.contains(params[1]))
+                    {
+                        System.out.println("Voce ja esta conectado a esse servidor!");
+                        return;
+                    }
+                    try
+                    {
+                        rmi.connectToServer(params[1]);
+                        System.out.println("Voce conectou-se ao servidor " + 
+                            params[1]);
+                        connectedToServers.add(params[1]);
+                    }
+                    catch(RemoteException ex)
+                    {
+                        System.out.println("Erro ao conectar ao servidor " + ex);
+                    }
+                }
             }
             catch (IOException ex)
             {
