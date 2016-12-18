@@ -5,13 +5,7 @@ import static java.rmi.server.RemoteServer.getClientHost;
 import java.rmi.server.ServerNotActiveException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-/**
- *
- * @author Jose'
- */
 public class RemoteService  extends UnicastRemoteObject
         implements RemoteServiceInterface
 {
@@ -28,12 +22,10 @@ public class RemoteService  extends UnicastRemoteObject
     {
         try
         {
-            notifyObservers("O servidor " + serverName + " conectou-se desde " + getClientHost());
+            notifyObservers("O servidor " + serverName +
+                    " conectou-se desde " + getClientHost());
         }
-        catch (ServerNotActiveException ex)
-        {
-            Logger.getLogger(RemoteService.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        catch (ServerNotActiveException ex) { }
     }
     
     @Override
@@ -43,9 +35,11 @@ public class RemoteService  extends UnicastRemoteObject
     }
     
     @Override
-    public synchronized void addObserver(RemoteObserverInterface observer) throws java.rmi.RemoteException
+    public synchronized void addObserver(RemoteObserverInterface observer)
+            throws java.rmi.RemoteException
     {
-        if(!observers.contains(observer)){
+        if(!observers.contains(observer))
+        {
             observers.add(observer);
             System.out.println("+ um observador.");
         }
@@ -63,10 +57,14 @@ public class RemoteService  extends UnicastRemoteObject
     {
         int i;
         
-        for(i=0; i < observers.size(); i++){
-            try{       
+        for(i=0; i < observers.size(); i++)
+        {
+            try
+            {       
                 observers.get(i).notifyNewOperationConcluded(msg);
-            }catch(RemoteException e){
+            }
+            catch(RemoteException e)
+            {
                 observers.remove(i--);
                 System.out.println("- um observador (observador inacessivel).");
             }

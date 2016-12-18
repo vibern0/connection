@@ -7,7 +7,7 @@ import java.rmi.RemoteException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class PACliente
+public class PDCliente
 {
     public static void main(String[] args){
         
@@ -45,7 +45,7 @@ public class PACliente
         }
         catch (MalformedURLException | NotBoundException ex)
         {
-            Logger.getLogger(PACliente.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(PDCliente.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         System.out.println("<Enter> para terminar...");
@@ -56,7 +56,7 @@ public class PACliente
         }
         catch (IOException ex)
         {
-            Logger.getLogger(PACliente.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(PDCliente.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         try
@@ -65,7 +65,7 @@ public class PACliente
         }
         catch (RemoteException ex)
         {
-            Logger.getLogger(PACliente.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(PDCliente.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }

@@ -6,7 +6,7 @@ import java.rmi.RemoteException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class PADiretoria
+public class PDDiretoria
 {
     static String cmd;
     
@@ -61,7 +61,7 @@ public class PADiretoria
         }
         catch (AlreadyBoundException ex)
         {
-            Logger.getLogger(PADiretoria.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(PDDiretoria.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         System.out.println("<Enter> para terminar...");
