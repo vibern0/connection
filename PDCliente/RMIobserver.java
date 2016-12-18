@@ -28,7 +28,7 @@ public class RMIobserver {
             //Localiza o servico remoto nomeado "GetRemoteFile"
             String objectUrl = "rmi://"+serviceLocalization+"/GetRemoteFile"; 
                             
-            GetRemoteFileServiceInterface getRemoteFileService = (GetRemoteFileServiceInterface)Naming.lookup(objectUrl);
+            RemoteServiceInterface getRemoteFileService = (RemoteServiceInterface)Naming.lookup(objectUrl);
             
             //adiciona observador no servico remoto
             getRemoteFileService.addObserver(observer);

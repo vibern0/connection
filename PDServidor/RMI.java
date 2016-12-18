@@ -6,7 +6,7 @@ import java.rmi.RemoteException;
 
 public class RMI {
     
-    private GetRemoteFileServiceInterface remoteFileService;
+    private RemoteServiceInterface remoteFileService;
     private final String serverName;
     
     public RMI(String serverName)
@@ -18,7 +18,7 @@ public class RMI {
     {
         String objectUrl;
         objectUrl = "rmi://"+serviceLocalization+"/GetRemoteFile"; 
-        remoteFileService = (GetRemoteFileServiceInterface)Naming.lookup(objectUrl);
+        remoteFileService = (RemoteServiceInterface)Naming.lookup(objectUrl);
         remoteFileService.connect(serverName);
         System.out.println("Conectado por RMI!");  
     }

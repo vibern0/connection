@@ -14,7 +14,7 @@ import java.util.logging.Logger;
  *
  * @author Jose'
  */
-public class GetRemoteFileService  extends UnicastRemoteObject implements GetRemoteFileServiceInterface
+public class RemoteService  extends UnicastRemoteObject implements RemoteServiceInterface
 {
     public static final String SERVICE_NAME = "GetRemoteFile";
     
@@ -22,7 +22,7 @@ public class GetRemoteFileService  extends UnicastRemoteObject implements GetRem
     
     protected File localDirectory;    
     
-    public GetRemoteFileService(File localDirectory) throws RemoteException 
+    public RemoteService(File localDirectory) throws RemoteException 
     {
         this.localDirectory = localDirectory;
         observers = new ArrayList<>();
@@ -37,7 +37,7 @@ public class GetRemoteFileService  extends UnicastRemoteObject implements GetRem
         }
         catch (ServerNotActiveException ex)
         {
-            Logger.getLogger(GetRemoteFileService.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RemoteService.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
@@ -77,9 +77,4 @@ public class GetRemoteFileService  extends UnicastRemoteObject implements GetRem
             }
         }
     }
-    
-    /*
-     * Lanca e regista um servico com interface remota do tipo GetRemoteFileInterface
-     * sob o nome dado pelo atributo estatico SERVICE_NAME.
-     */  
 }

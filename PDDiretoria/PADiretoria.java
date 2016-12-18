@@ -1,5 +1,10 @@
 
+import java.io.IOException;
 import java.net.SocketException;
+import java.rmi.AlreadyBoundException;
+import java.rmi.RemoteException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class PADiretoria
 {
@@ -7,9 +12,10 @@ public class PADiretoria
     
     public static void main(String[] args)
     {
-        if(args.length < 1)
+        if(args.length < 3)
         {
-            System.out.println("Incompleto! Parametros -> [UDP escuta clientes] [UDP escuta servidores]");
+            System.out.println("Incompleto! Parametros -> " +
+                    "[UDP escuta clientes] [UDP escuta servidores] [diretorio RMI]");
             return;
         }
         
@@ -43,6 +49,35 @@ public class PADiretoria
             return;
         }
         
-        new RMIservice().run("./");
+        RMI rmi = new RMI();
+        try
+        {
+            rmi.run(args[2]);
+        }
+        catch (RemoteException ex)
+        {
+            System.out.println("Erro remoto - " + ex);
+            System.exit(1);
+        }
+        catch (AlreadyBoundException ex)
+        {
+            Logger.getLogger(PADiretoria.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        System.out.println("<Enter> para terminar...");
+        try
+        {
+            System.in.read();
+        }
+        catch (IOException ex) { }
+        try
+        {
+            rmi.close();
+        }
+        catch (RemoteException ex)
+        {
+            System.out.println("Erro remoto - " + ex);
+        }
+        System.exit(0);
     }
 }
