@@ -4,6 +4,7 @@ import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.util.List;
 import java.util.Scanner;
 import pacliente.Properties;
 
@@ -11,6 +12,7 @@ public class PDCliente
 {
     private static TcpToServer tcpToServer;
     private static UdpClient udpClient;
+    private static RMI rmi;
     public static void main(String[] args)
     {    
         if(args.length < 3)
@@ -33,7 +35,7 @@ public class PDCliente
         
         new HeartbeatClient(udpClient.getSocket(), args[0], Integer.parseInt(args[1])).run();
         
-        RMI rmi = new RMI(args[2]);
+        rmi = new RMI(args[2]);
         try
         {
             rmi.run(args[0]);
@@ -88,6 +90,18 @@ public class PDCliente
         {
             try
             {
+                if(command.startsWith(Properties.LIST_SERVERS))
+                {
+                    List<String> serversN = rmi.getAllServersName();
+                    System.out.println("Servers available:");
+                    for(String name : serversN)
+                    {
+                        System.out.println(name);
+                    }
+                }
+                
+                
+                
                 udpClient.sendCommand(command);
             }
             catch (IOException ex)

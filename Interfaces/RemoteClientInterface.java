@@ -1,6 +1,4 @@
 
-import java.util.List;
-
 public interface RemoteClientInterface extends java.rmi.Remote
 {
     //

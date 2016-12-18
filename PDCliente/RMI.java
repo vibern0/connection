@@ -5,6 +5,8 @@ import java.rmi.NoSuchObjectException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RMI {
     
@@ -25,6 +27,19 @@ public class RMI {
         remoteService = (RemoteServiceInterface)Naming.lookup(objectUrl);
         remoteService.addObserver(observer);
             
+    }
+    
+    public List<String> getAllServersName() throws RemoteException
+    {
+        List<String> values = new ArrayList<>();
+        //
+        List<RemoteClientInterface> servers = remoteService.allServersInfo();
+        for(RemoteClientInterface server : servers)
+        {
+            values.add(server.getName());
+        }
+        //
+        return values;
     }
     
     public void close() throws NoSuchObjectException, RemoteException

@@ -87,7 +87,7 @@ public class RemoteService  extends UnicastRemoteObject
             try
             {       
                 servers.get(i).getName();
-                
+                values.add(servers.get(i));
             }
             catch(RemoteException e)
             {
@@ -96,5 +96,19 @@ public class RemoteService  extends UnicastRemoteObject
             }
         }
         return values;
+    }
+
+    @Override
+    public RemoteClientInterface searchServerByName(String serverName)
+            throws RemoteException
+    {
+        for(RemoteClientInterface server : servers)
+        {
+            if(server.getName().equals(serverName))
+            {
+                return server;
+            }
+        }
+        throw new RemoteException();
     }
 }
