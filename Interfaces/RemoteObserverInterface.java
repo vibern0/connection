@@ -1,8 +1,8 @@
 
-import java.rmi.*;
-
-public interface RemoteObserverInterface extends Remote
+public interface RemoteObserverInterface extends java.rmi.Remote
 {
+    public String getName()
+            throws java.rmi.RemoteException;
     public void notifyNewOperationConcluded(String description)
-            throws RemoteException;
+            throws java.rmi.RemoteException;
 }

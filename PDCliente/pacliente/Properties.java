@@ -54,6 +54,13 @@ public class Properties
     public static Integer   SUCCESS_DOWNLOAD_FILE       = 2011;
     
     
+    //
+    public static String    LIST                        = "list";
+    public static String    LIST_SERVERS                = "list servers";
+    public static String    MESSAGE_TO_ALL              = "mall";
+    public static String    MESSAGE_TO_CLIENT           = "pm";
+    public static String    CONNECT_TO_SERVER           = "connect";
+    public static String    DISCONNECT_FROM_SERVER      = "disconnect";
     
     //Comandos para o servico de diretoria
     public static String    COMMAND_HEARTBEAT           = "hearbeat_cliente";

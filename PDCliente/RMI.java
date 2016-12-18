@@ -10,12 +10,16 @@ public class RMI {
     
     private RemoteServiceInterface remoteService;
     private RemoteObserver observer;
-    public RMI() { }
+    private final String username;
+    public RMI(String username)
+    {
+        this.username = username;
+    }
     public void run(String serviceLocalization)
             throws RemoteException, MalformedURLException, NotBoundException
     {	
         
-        observer = new RemoteObserver();
+        observer = new RemoteObserver(username);
         System.out.println("Servico GetRemoteFileObserver criado e em execucao...");
         String objectUrl = "rmi://"+serviceLocalization+"/GetRemoteFile";
         remoteService = (RemoteServiceInterface)Naming.lookup(objectUrl);

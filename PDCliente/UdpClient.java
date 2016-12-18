@@ -2,12 +2,16 @@ import java.net.*;
 import java.io.*;
 import static pacliente.Properties.*;
 
-public class UdpClient extends Thread {
-
+public class UdpClient extends Thread
+{
     private final DatagramSocket socket;
-    public UdpClient() throws SocketException 
+    private final String ip;
+    private final int port;
+    public UdpClient(String ip, int port) throws SocketException 
     {
-        socket = new DatagramSocket();
+        this.socket = new DatagramSocket();
+        this.ip = ip;
+        this.port = port;
     }
     
     public DatagramSocket getSocket()
@@ -31,6 +35,21 @@ public class UdpClient extends Thread {
         } catch (IOException ex) { ex.printStackTrace(); }
         
         //do shit
+    }
+    
+    public void sendCommand(String command) throws IOException
+    {
+        //
+        DatagramPacket packet;
+        packet = new DatagramPacket(command.getBytes(),
+                command.length(), InetAddress.getByName(ip), port);
+        socket.send(packet);
+    }
+    
+    public void finish()
+    {
+        socket.close();
+        interrupt();
     }
   
 }

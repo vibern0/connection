@@ -34,8 +34,10 @@ public class RemoteService  extends UnicastRemoteObject
     @Override
     public void removeServer(RemoteClientInterface server) throws java.rmi.RemoteException
     {
-        notifyObservers("O servidor " + server.getName() + " desconectou-se!");
-        servers.remove(server);
+        if(servers.remove(server))
+        {
+            notifyObservers("O servidor " + server.getName() + " desconectou-se!");
+        }
     }
     
     @Override
@@ -73,5 +75,26 @@ public class RemoteService  extends UnicastRemoteObject
                 System.out.println("- um observador (observador inacessivel).");
             }
         }
+    }
+
+    @Override
+    public List<RemoteClientInterface> allServersInfo() throws RemoteException
+    {
+        int i;
+        List<RemoteClientInterface> values = new ArrayList<>();
+        for(i=0; i < servers.size(); i++)
+        {
+            try
+            {       
+                servers.get(i).getName();
+                
+            }
+            catch(RemoteException e)
+            {
+                observers.remove(i--);
+                System.out.println("Um servidor desconectou-se (Inacessivel).");
+            }
+        }
+        return values;
     }
 }

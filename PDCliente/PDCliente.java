@@ -4,60 +4,64 @@ import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Scanner;
+import pacliente.Properties;
 
 public class PDCliente
 {
-    public static void main(String[] args){
-        
-        if(args.length < 2)
+    private static TcpToServer tcpToServer;
+    private static UdpClient udpClient;
+    public static void main(String[] args)
+    {    
+        if(args.length < 3)
         {
-            System.out.println("Incompleto! Parametros -> [ip UDP] [porto UDP]");
+            System.out.println("Incompleto! Parametros -> [ip UDP] [porto UDP] [username]");
             return;
         }
         
-        UdpClient udpClient;
         try
         {
-            udpClient = new UdpClient();
+            udpClient = new UdpClient(args[0], Integer.parseInt(args[1]));
             System.out.println("UDP iniciado no porto " + udpClient.getPort());
             udpClient.start();
         }
         catch (SocketException ex)
         {
-            ex.printStackTrace();
-            System.out.println("Erro ao iniciar UDP!");
+            System.out.println("Erro ao iniciar UDP!" + ex);
             return;
         }
         
         new HeartbeatClient(udpClient.getSocket(), args[0], Integer.parseInt(args[1])).run();
         
-        RMI rmi = new RMI();
+        RMI rmi = new RMI(args[2]);
         try
         {
             rmi.run(args[0]);
         }
         catch(RemoteException e)
         {
+            udpClient.finish();
             System.out.println("Erro remoto - " + e);
             System.exit(1);
         }
         catch (MalformedURLException | NotBoundException ex)
         {
-            Logger.getLogger(PDCliente.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("Erro RMI." + ex);
+            System.exit(1);
         }
+        tcpToServer = null;
+        //
         
-        System.out.println("<Enter> para terminar...");
-        System.out.println();
-        try
+        Scanner sc;
+        String command;
+        sc = new Scanner(System.in);
+        do
         {
-            System.in.read();
-        }
-        catch (IOException ex)
-        {
-            Logger.getLogger(PDCliente.class.getName()).log(Level.SEVERE, null, ex);
-        }
+            System.out.print("Command:");
+            command = sc.nextLine();
+            processCommand(command);
+
+        } while(!command.equals(Properties.COMMAND_DISCONNECT));
         
         try
         {
@@ -65,7 +69,36 @@ public class PDCliente
         }
         catch (RemoteException ex)
         {
-            Logger.getLogger(PDCliente.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("Erro ao fechar RMI." + ex);
+            System.exit(1);
+        }
+    }
+    
+    public static void processCommand(String command)
+    {
+        if(command.equals("help"))
+        {
+            //mostra todos os comandos
+        }
+        else if(command.startsWith(Properties.LIST) ||
+                command.startsWith(Properties.MESSAGE_TO_ALL) ||
+                command.startsWith(Properties.MESSAGE_TO_CLIENT) ||
+                command.startsWith(Properties.CONNECT_TO_SERVER) ||
+                command.startsWith(Properties.DISCONNECT_FROM_SERVER))
+        {
+            try
+            {
+                udpClient.sendCommand(command);
+            }
+            catch (IOException ex)
+            {
+                System.out.println("Erro ao enviar comando para UDP." + ex);
+                System.exit(1);
+            }
+        }
+        else
+        {
+            //enviar para servidor tcp
         }
     }
 }
