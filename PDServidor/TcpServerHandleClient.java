@@ -36,19 +36,17 @@ import paservidor.Database;
  */
 public class TcpServerHandleClient implements Runnable {
 
-    private final Socket socket;
     private String current_folder;
     private final Database database;
-    private boolean logged;
     private final OutputStream oStream;
     private final InputStream iStream;
+    private final String serverName;
     
-    public TcpServerHandleClient(Socket socket) throws IOException
+    public TcpServerHandleClient(Socket socket, String serverName, Database database) throws IOException
     {
-        this.socket = socket;
         this.current_folder = "/";
-        this.database = new Database();
-        this.logged = false;
+        this.database = database;
+        this.serverName = serverName;
         this.oStream = socket.getOutputStream();
         this.iStream = socket.getInputStream();
     }
@@ -127,9 +125,6 @@ public class TcpServerHandleClient implements Runnable {
             ooStream.writeObject(Properties.COMMAND_LOGIN);
             ooStream.writeObject(result);
             ooStream.flush();
-
-            if(result.equals(Properties.SUCCESS_LOGGED))
-                logged = true;
         }
         else if(command.equals(Properties.COMMAND_LOGOUT))
         {
@@ -141,7 +136,7 @@ public class TcpServerHandleClient implements Runnable {
         {
             String [] params = command.split(" ");
             
-            Path currentRelativePath = Paths.get("");
+            Path currentRelativePath = Paths.get(serverName);
             String path = currentRelativePath.toAbsolutePath().toString();
 
             Files.createDirectories(Paths.get(path + current_folder + params[1]));
@@ -153,7 +148,7 @@ public class TcpServerHandleClient implements Runnable {
         else if(command.equals(Properties.COMMAND_LIST_CONTENT))
         {
             ArrayList<String> content = new ArrayList<>();
-            Path currentRelativePath = Paths.get("");
+            Path currentRelativePath = Paths.get(serverName);
             String path = currentRelativePath.toAbsolutePath().toString();
             Path dir = Paths.get(path + current_folder);
                 
@@ -172,7 +167,7 @@ public class TcpServerHandleClient implements Runnable {
             String [] params = command.split(" ");
             
             ArrayList<String> content = new ArrayList<>();
-            Path currentRelativePath = Paths.get("");
+            Path currentRelativePath = Paths.get(serverName);
             String path = currentRelativePath.toAbsolutePath().toString();
             
             String [] moves = params[1].split("/");
@@ -221,7 +216,7 @@ public class TcpServerHandleClient implements Runnable {
         {
             String [] params = command.split(" ");
             
-            Path currentRelativePath = Paths.get("");
+            Path currentRelativePath = Paths.get(serverName);
             String path = currentRelativePath.toAbsolutePath().toString();
             
             Path source = Paths.get(path + current_folder + params[1]);
@@ -243,7 +238,7 @@ public class TcpServerHandleClient implements Runnable {
         {
             String [] params = command.split(" ");
             
-            Path currentRelativePath = Paths.get("");
+            Path currentRelativePath = Paths.get(serverName);
             String path = currentRelativePath.toAbsolutePath().toString();
             
             Path source = Paths.get(path + current_folder + params[1]);
@@ -265,7 +260,7 @@ public class TcpServerHandleClient implements Runnable {
         {
             String [] params = command.split(" ");
             
-            Path currentRelativePath = Paths.get("");
+            Path currentRelativePath = Paths.get(serverName);
             String path = currentRelativePath.toAbsolutePath().toString();
             
             File file = new File(path + current_folder + params[1]);

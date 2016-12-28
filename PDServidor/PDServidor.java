@@ -1,20 +1,38 @@
 
+import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.SocketException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class PDServidor
-{
-    public static TcpServer tcpServer;
-    
+{   
     public static void main(String[] args)
     {
         if(args.length < 4)
         {
             System.out.println("Incompleto! Parametros -> [nome] [ip UDP] [porto UDP] [porto local]");
             return;
+        }
+        
+        //check if folder exists
+        File serverFolder = new File(args[0]);
+        if(!serverFolder.exists())
+        {
+            try
+            {
+                Files.createDirectories(Paths.get(args[0]));
+            }
+            catch (IOException ex)
+            {
+                Logger.getLogger(PDServidor.class.getName()).log(Level.SEVERE, null, ex);
+                System.exit(1);
+            }
         }
         
         ServerSocket serverSocket = null;
@@ -43,15 +61,24 @@ public class PDServidor
             System.exit(1);
         }
         
+        Thread tcp_thread = new TcpServer(serverSocket, args[0]);
+        tcp_thread.start();
+        
         try
         {
             new Heartbeat(args[0], args[1], Integer.parseInt(args[2]), Integer.parseInt(args[3])).run();
         }
         catch (SocketException ex)
         {
-            ex.printStackTrace();
             System.out.println("Erro ao iniciar UDP!");
-            //fechar tcp!
+            tcp_thread.interrupt();
+            try
+            {
+                serverSocket.close();
+            } catch (IOException ex1) { }
+            //
+            Logger.getLogger(PDServidor.class.getName()).log(Level.SEVERE, null, ex);
+            //
             return;
         }
         

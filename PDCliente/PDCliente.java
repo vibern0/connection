@@ -177,7 +177,7 @@ public class PDCliente
                         System.out.println(rmi.getServerIP(params[1]) + " " + rmi.getServerPort(params[1]));
                         connectedToServers.add(params[1]);
                         TcpToServer tcp = new TcpToServer(
-                                rmi.getServerIP(params[1]),
+                                "127.0.0.1",
                                 rmi.getServerPort(params[1])
                         );
                         tcpToServer.add(tcp);

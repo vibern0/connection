@@ -7,30 +7,27 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class TcpToServer
 {
-    private Socket socket;
+    private final Socket socket;
     private Map<String, Integer> params;
     public static OutputStream oStream;
-    private ObjectOutputStream ooStream;
-    private Thread thread_tcpconn;
+    private final ObjectOutputStream ooStream;
+    private final Thread thread_tcpconn;
 
     public TcpToServer(String hostname, int port)
             throws IOException
     {
         registerNParams();
         
-        this.socket = new Socket(hostname, port);
+        socket = new Socket(hostname, port);
         oStream = this.socket.getOutputStream();
-        this.ooStream = new ObjectOutputStream(oStream);
+        ooStream = new ObjectOutputStream(oStream);
 
         TcpToServerReceiver tcpconn = new TcpToServerReceiver(socket);
-        this.thread_tcpconn = new Thread(tcpconn);
-        this.thread_tcpconn.start();
+        thread_tcpconn = new Thread(tcpconn);
+        thread_tcpconn.start();
         
     }
     
@@ -62,11 +59,14 @@ public class TcpToServer
     
     public void checkCommand(String command) throws IOException
     {
-        if(!Properties.LOGGED && !command.startsWith(Properties.COMMAND_LOGIN))
+        if(!TcpToServerReceiver.connectedTo.contains(socket)
+                && (!command.startsWith(Properties.COMMAND_LOGIN) &&
+                !command.startsWith(Properties.COMMAND_REGISTER)))
         {
             System.out.println("You are not logged yet!");
         }
-        else if(Properties.LOGGED && command.startsWith(Properties.COMMAND_LOGIN))
+        else if(TcpToServerReceiver.connectedTo.contains(socket)
+                && command.startsWith(Properties.COMMAND_LOGIN))
         {
             System.out.println("You are already logged!");
         }

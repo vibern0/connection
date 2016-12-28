@@ -12,8 +12,6 @@ package pacliente;
  */
 public class Properties
 {
-    public static boolean   LOGGED                      = false;
-    
     public static String    COMMAND_DISCONNECT          = "disconnect";
     public static String    COMMAND_CUR_DIR_PATH        = "pwd";
     public static String    COMMAND_REGISTER            = "register";
