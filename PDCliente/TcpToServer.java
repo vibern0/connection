@@ -7,52 +7,36 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class TcpToServer
 {
-    private Socket socket;
+    private final Socket socket;
     private Map<String, Integer> params;
     public static OutputStream oStream;
+    private final ObjectOutputStream ooStream;
+    private final Thread thread_tcpconn;
 
     public TcpToServer(String hostname, int port)
+            throws IOException
     {
         registerNParams();
         
-        try
-        {
-            this.socket = new Socket(hostname, port);
-            
-            Scanner sc;
-            String cmd;
-            
-            oStream = this.socket.getOutputStream();
-            ObjectOutputStream ooStream = new ObjectOutputStream(oStream);
-            
-            TcpToServerReceiver tcpconn = new TcpToServerReceiver(socket);
-            Thread thread_tcpconn = new Thread(tcpconn);
-            thread_tcpconn.start();
-            
-            sc = new Scanner(System.in);
-            do
-            {
-                System.out.print("Command:");
-                cmd = sc.nextLine();
-                checkCommand(ooStream, cmd);
-                
-            } while(!cmd.equals(Properties.COMMAND_DISCONNECT));
-            oStream.close();
-            ooStream.close();
-            
-            thread_tcpconn.join();
-        }
-        catch (IOException | InterruptedException ex)
-        {
-            Logger.getLogger(TcpToServer.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        socket = new Socket(hostname, port);
+        oStream = this.socket.getOutputStream();
+        ooStream = new ObjectOutputStream(oStream);
+
+        TcpToServerReceiver tcpconn = new TcpToServerReceiver(socket);
+        thread_tcpconn = new Thread(tcpconn);
+        thread_tcpconn.start();
         
+    }
+    
+    public void close() throws IOException, InterruptedException
+    {
+        oStream.close();
+        ooStream.close();
+        
+        thread_tcpconn.join();
     }
     
     private void registerNParams()
@@ -73,13 +57,16 @@ public class TcpToServer
         params.put(Properties.COMMAND_DOWNLOAD,         1);
     }
     
-    private void checkCommand(ObjectOutputStream ooStream, String command) throws IOException
+    public void checkCommand(String command) throws IOException
     {
-        if(!Properties.LOGGED && !command.startsWith(Properties.COMMAND_LOGIN))
+        if(!TcpToServerReceiver.connectedTo.contains(socket)
+                && (!command.startsWith(Properties.COMMAND_LOGIN) &&
+                !command.startsWith(Properties.COMMAND_REGISTER)))
         {
             System.out.println("You are not logged yet!");
         }
-        else if(Properties.LOGGED && command.startsWith(Properties.COMMAND_LOGIN))
+        else if(TcpToServerReceiver.connectedTo.contains(socket)
+                && command.startsWith(Properties.COMMAND_LOGIN))
         {
             System.out.println("You are already logged!");
         }

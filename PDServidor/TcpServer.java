@@ -1,26 +1,32 @@
 
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
+import paservidor.Database;
 
 
-public class TcpServer
+public class TcpServer extends Thread
 {
-    private ServerSocket serverSocket;
-    
-
-    public TcpServer(int port)
+    private final ServerSocket serverSocket;
+    private final Database database;
+    private final String serverName;
+    public TcpServer(ServerSocket serverSocket, String serverName)
     {
-        initServerSocket(port);
+        this.serverSocket = serverSocket;
+        this.serverName = serverName;
+        this.database = new Database(serverName);
+    }
+    
+    @Override
+    public void run()
+    {
         try
         {
             while (true)
             {
                 Socket socket = this.serverSocket.accept();
-                TcpServerHandleClient handle = new TcpServerHandleClient(socket);
+                TcpServerHandleClient handle = new TcpServerHandleClient(socket, serverName, database);
                 Thread threadhandle = new Thread(handle);
                 threadhandle.start();
             }
@@ -49,34 +55,6 @@ public class TcpServer
                 System.err.println(ioe.toString());
                 System.exit(1);
             }
-        }
-    }
-
-    private void initServerSocket(int port)
-    {
-        try
-        {
-            this.serverSocket = new java.net.ServerSocket(port);
-            assert this.serverSocket.isBound();
-            if (this.serverSocket.isBound())
-            {
-                System.out.println("SERVER inbound data port " +
-                    this.serverSocket.getLocalPort() +
-                    " is ready and waiting for client to connect...");
-            }
-            
-        }
-        catch (SocketException se)
-        {
-            System.err.println("Unable to create socket.");
-            System.err.println(se.toString());
-            System.exit(1);
-        }
-        catch (IOException ioe)
-        {
-            System.err.println("Unable to read data from an open socket.");
-            System.err.println(ioe.toString());
-            System.exit(1);
         }
     }
 }

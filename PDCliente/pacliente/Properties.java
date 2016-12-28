@@ -12,8 +12,6 @@ package pacliente;
  */
 public class Properties
 {
-    public static boolean   LOGGED                      = false;
-    
     public static String    COMMAND_DISCONNECT          = "disconnect";
     public static String    COMMAND_CUR_DIR_PATH        = "pwd";
     public static String    COMMAND_REGISTER            = "register";
@@ -58,10 +56,15 @@ public class Properties
     public static String    LIST                        = "list";
     public static String    LIST_SERVERS                = "list servers";
     public static String    LIST_CLIENTS                = "list clients";
+    public static String    LIST_CONNECTED              = "list connected";
     public static String    MESSAGE_TO_ALL              = "mall";
     public static String    MESSAGE_TO_CLIENT           = "pm";
     public static String    CONNECT_TO_SERVER           = "connect";
     public static String    DISCONNECT_FROM_SERVER      = "disconnect";
+    public static String    CHANGE_SERVER               = "chserver";
+    public static String    CHANGE_FOLDER               = "chfolder";
+    public static String    FOLDER_REMOTE               = "remote";
+    public static String    FOLDER_LOCAL                = "local";
     
     //Comandos para o servico de diretoria
     public static String    COMMAND_HEARTBEAT           = "hearbeat_cliente";

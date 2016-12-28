@@ -7,8 +7,6 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class RMI {
     
@@ -49,6 +47,20 @@ public class RMI {
         RemoteClientInterface server =
                 remoteService.searchServerByName(serverName);
         server.connectUser(observer);
+    }
+    
+    public String getServerIP(String serverName) throws RemoteException
+    {
+        RemoteClientInterface server =
+                remoteService.searchServerByName(serverName);
+        return server.getIP();
+    }
+    
+    public int getServerPort(String serverName) throws RemoteException
+    {
+        RemoteClientInterface server =
+                remoteService.searchServerByName(serverName);
+        return server.getPort();
     }
     
     public void close() throws NoSuchObjectException, RemoteException

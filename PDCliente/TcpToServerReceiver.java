@@ -12,6 +12,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -27,12 +28,17 @@ import java.util.logging.Logger;
  */
 class TcpToServerReceiver implements Runnable
 {
+    public static List<Socket> connectedTo = null;
     private final Socket socket;
     private InputStream iStream;
     
     public TcpToServerReceiver(Socket socket)
     {
         this.socket = socket;
+        if(connectedTo == null)
+        {
+            connectedTo = new ArrayList<>();
+        }
     }
 
     @Override
@@ -86,7 +92,7 @@ class TcpToServerReceiver implements Runnable
             output_type = (Integer)oiStream.readObject();
             if(output_type.equals(Properties.SUCCESS_LOGGED))
             {
-                Properties.LOGGED = true;
+                TcpToServerReceiver.connectedTo.add(socket);
                 System.out.println("You are logged now.");
             }
             else if(output_type.equals(Properties.ERROR_WRONG_PASSWORD))

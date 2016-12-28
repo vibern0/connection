@@ -19,12 +19,12 @@ public class Database {
     private Connection c = null;
     private Statement stmt = null;
         
-    public Database()
+    public Database(String serverName)
     {
         try
         {
             Class.forName("org.sqlite.JDBC");
-            c = DriverManager.getConnection("jdbc:sqlite:clients.db");
+            c = DriverManager.getConnection("jdbc:sqlite:" + serverName + "/clients.db");
             c.setAutoCommit(false);
             System.out.println("Opened database successfully!");
             createTables();
