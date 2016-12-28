@@ -62,6 +62,7 @@ public class Properties
     public static String    MESSAGE_TO_CLIENT           = "pm";
     public static String    CONNECT_TO_SERVER           = "connect";
     public static String    DISCONNECT_FROM_SERVER      = "disconnect";
+    public static String    CHANGE_SERVER               = "chserver";
     
     //Comandos para o servico de diretoria
     public static String    COMMAND_HEARTBEAT           = "hearbeat_cliente";

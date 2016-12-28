@@ -11,10 +11,11 @@ import pacliente.Properties;
 
 public class PDCliente
 {
-    private static TcpToServer tcpToServer;
+    private static List<TcpToServer> tcpToServer;
     private static UdpClient udpClient;
     private static RMI rmi;
     private static List<String> connectedToServers;
+    private static int toServer;
     public static void main(String[] args)
     {    
         if(args.length < 3)
@@ -54,7 +55,8 @@ public class PDCliente
             System.out.println("Erro RMI." + ex);
             System.exit(1);
         }
-        tcpToServer = null;
+        tcpToServer = new ArrayList<>();
+        toServer = 0;
         //
         
         Scanner sc;
@@ -130,15 +132,29 @@ public class PDCliente
                             params[1]);
                         System.out.println(rmi.getServerIP(params[1]) + " " + rmi.getServerPort(params[1]));
                         connectedToServers.add(params[1]);
-                        tcpToServer = new TcpToServer(
+                        TcpToServer tcp = new TcpToServer(
                                 rmi.getServerIP(params[1]),
                                 rmi.getServerPort(params[1])
                         );
+                        tcpToServer.add(tcp);
                     }
                     catch(RemoteException ex)
                     {
                         System.out.println("Erro ao conectar ao servidor " + ex);
                     }
+                }
+                else if(command.startsWith(Properties.CHANGE_SERVER))
+                {
+                    String [] params = command.split(" ");
+                    int serverNumber = Integer.parseInt(params[1]);
+                    if(serverNumber < 0)
+                        return;
+                    if(serverNumber >= tcpToServer.size())
+                        return;
+                    if(tcpToServer.get(toServer) == null)
+                        return;
+                    
+                    toServer = serverNumber;
                 }
             }
             catch (IOException ex)
@@ -147,11 +163,11 @@ public class PDCliente
                 System.exit(1);
             }
         }
-        else if(tcpToServer != null)
+        else if(tcpToServer.size() > 0)
         {
             try
             {
-                tcpToServer.checkCommand(command);
+                tcpToServer.get(toServer).checkCommand(command);
                 //enviar para servidor tcp
             }
             catch (IOException ex)
