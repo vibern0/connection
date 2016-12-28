@@ -16,43 +16,30 @@ public class TcpToServer
     private Socket socket;
     private Map<String, Integer> params;
     public static OutputStream oStream;
+    private ObjectOutputStream ooStream;
+    private Thread thread_tcpconn;
 
     public TcpToServer(String hostname, int port)
+            throws IOException
     {
         registerNParams();
         
-        try
-        {
-            this.socket = new Socket(hostname, port);
-            
-            Scanner sc;
-            String cmd;
-            
-            oStream = this.socket.getOutputStream();
-            ObjectOutputStream ooStream = new ObjectOutputStream(oStream);
-            
-            TcpToServerReceiver tcpconn = new TcpToServerReceiver(socket);
-            Thread thread_tcpconn = new Thread(tcpconn);
-            thread_tcpconn.start();
-            
-            sc = new Scanner(System.in);
-            do
-            {
-                System.out.print("Command:");
-                cmd = sc.nextLine();
-                checkCommand(ooStream, cmd);
-                
-            } while(!cmd.equals(Properties.COMMAND_DISCONNECT));
-            oStream.close();
-            ooStream.close();
-            
-            thread_tcpconn.join();
-        }
-        catch (IOException | InterruptedException ex)
-        {
-            Logger.getLogger(TcpToServer.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        this.socket = new Socket(hostname, port);
+        oStream = this.socket.getOutputStream();
+        this.ooStream = new ObjectOutputStream(oStream);
+
+        TcpToServerReceiver tcpconn = new TcpToServerReceiver(socket);
+        this.thread_tcpconn = new Thread(tcpconn);
+        this.thread_tcpconn.start();
         
+    }
+    
+    public void close() throws IOException, InterruptedException
+    {
+        oStream.close();
+        ooStream.close();
+        
+        thread_tcpconn.join();
     }
     
     private void registerNParams()
@@ -73,7 +60,7 @@ public class TcpToServer
         params.put(Properties.COMMAND_DOWNLOAD,         1);
     }
     
-    private void checkCommand(ObjectOutputStream ooStream, String command) throws IOException
+    public void checkCommand(String command) throws IOException
     {
         if(!Properties.LOGGED && !command.startsWith(Properties.COMMAND_LOGIN))
         {

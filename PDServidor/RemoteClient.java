@@ -1,4 +1,5 @@
 
+import java.net.ServerSocket;
 import java.rmi.*;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
@@ -8,11 +9,13 @@ public class RemoteClient extends UnicastRemoteObject
         implements RemoteClientInterface
 {
     private final String serverName;
+    private final ServerSocket serverSocket;
     private final List<RemoteObserverInterface> users;
-    public RemoteClient(String serverName) throws RemoteException
+    public RemoteClient(String serverName, ServerSocket serverSocket) throws RemoteException
     {
         //
         this.serverName = serverName;
+        this.serverSocket = serverSocket;
         this.users = new ArrayList<>();
     }
 
@@ -20,6 +23,18 @@ public class RemoteClient extends UnicastRemoteObject
     public String getName() throws RemoteException
     {
         return serverName;
+    }
+    
+    @Override
+    public String getIP() throws RemoteException
+    {
+        return serverSocket.getInetAddress().getHostAddress();
+    }
+    
+    @Override
+    public int getPort() throws RemoteException
+    {
+        return serverSocket.getLocalPort();
     }
 
     @Override

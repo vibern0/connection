@@ -128,7 +128,12 @@ public class PDCliente
                         rmi.connectToServer(params[1]);
                         System.out.println("Voce conectou-se ao servidor " + 
                             params[1]);
+                        System.out.println(rmi.getServerIP(params[1]) + " " + rmi.getServerPort(params[1]));
                         connectedToServers.add(params[1]);
+                        tcpToServer = new TcpToServer(
+                                rmi.getServerIP(params[1]),
+                                rmi.getServerPort(params[1])
+                        );
                     }
                     catch(RemoteException ex)
                     {
@@ -142,9 +147,18 @@ public class PDCliente
                 System.exit(1);
             }
         }
-        else
+        else if(tcpToServer != null)
         {
-            //enviar para servidor tcp
+            try
+            {
+                tcpToServer.checkCommand(command);
+                //enviar para servidor tcp
+            }
+            catch (IOException ex)
+            {
+                System.out.println("Erro ao enviar comando para UDP." + ex);
+                System.exit(1);
+            }
         }
     }
 }

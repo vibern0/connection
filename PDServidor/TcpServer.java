@@ -1,20 +1,19 @@
 
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
 
 
 public class TcpServer
 {
     private ServerSocket serverSocket;
     
-
-    public TcpServer(int port)
+    
+    public TcpServer(ServerSocket serverSocket)
     {
-        initServerSocket(port);
+        this.serverSocket = serverSocket;
+        //initServerSocket(port);
         try
         {
             while (true)
@@ -49,34 +48,6 @@ public class TcpServer
                 System.err.println(ioe.toString());
                 System.exit(1);
             }
-        }
-    }
-
-    private void initServerSocket(int port)
-    {
-        try
-        {
-            this.serverSocket = new java.net.ServerSocket(port);
-            assert this.serverSocket.isBound();
-            if (this.serverSocket.isBound())
-            {
-                System.out.println("SERVER inbound data port " +
-                    this.serverSocket.getLocalPort() +
-                    " is ready and waiting for client to connect...");
-            }
-            
-        }
-        catch (SocketException se)
-        {
-            System.err.println("Unable to create socket.");
-            System.err.println(se.toString());
-            System.exit(1);
-        }
-        catch (IOException ioe)
-        {
-            System.err.println("Unable to read data from an open socket.");
-            System.err.println(ioe.toString());
-            System.exit(1);
         }
     }
 }
