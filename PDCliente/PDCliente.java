@@ -16,6 +16,7 @@ public class PDCliente
     private static RMI rmi;
     private static List<String> connectedToServers;
     private static int toServer;
+    private static boolean commandsToRemote;
     public static void main(String[] args)
     {    
         if(args.length < 3)
@@ -57,6 +58,7 @@ public class PDCliente
         }
         tcpToServer = new ArrayList<>();
         toServer = 0;
+        commandsToRemote = true;
         //
         
         Scanner sc;
@@ -81,11 +83,45 @@ public class PDCliente
         }
     }
     
-    public static void processCommand(String command)
+    private static void processCommand(String command)
     {
         if(command.equals("help"))
         {
+            System.out.println("Help wanted! :");
             //mostra todos os comandos
+        }
+        if(command.startsWith(Properties.CHANGE_SERVER))
+        {
+            String [] params = command.split(" ");
+            int serverNumber = Integer.parseInt(params[1]);
+            if(serverNumber < 0)
+                return;
+            if(serverNumber >= tcpToServer.size())
+                return;
+            if(tcpToServer.get(toServer) == null)
+                return;
+
+            toServer = serverNumber;
+        }
+        else if(command.startsWith(Properties.CHANGE_FOLDER))
+        {
+            String [] params = command.split(" ");
+
+            if(params.length < 2)
+                return;
+
+            if(params[1].equals(Properties.FOLDER_REMOTE))
+            {
+                commandsToRemote = true;
+            }
+            else if(params[1].equals(Properties.FOLDER_LOCAL))
+            {
+                commandsToRemote = false;
+            }
+            else
+            {
+                System.out.println("Cant understand the location!");
+            }
         }
         else if(command.startsWith(Properties.LIST) ||
                 command.startsWith(Properties.MESSAGE_TO_ALL) ||
@@ -100,6 +136,14 @@ public class PDCliente
                     List<String> serversN = rmi.getAllServersName();
                     System.out.println("Servers available:");
                     for(String name : serversN)
+                    {
+                        if(!connectedToServers.contains(name))
+                            System.out.println(name);
+                    }
+                }
+                else if(command.startsWith(Properties.LIST_CONNECTED))
+                {
+                    for(String name : connectedToServers)
                     {
                         System.out.println(name);
                     }
@@ -143,25 +187,16 @@ public class PDCliente
                         System.out.println("Erro ao conectar ao servidor " + ex);
                     }
                 }
-                else if(command.startsWith(Properties.CHANGE_SERVER))
-                {
-                    String [] params = command.split(" ");
-                    int serverNumber = Integer.parseInt(params[1]);
-                    if(serverNumber < 0)
-                        return;
-                    if(serverNumber >= tcpToServer.size())
-                        return;
-                    if(tcpToServer.get(toServer) == null)
-                        return;
-                    
-                    toServer = serverNumber;
-                }
             }
             catch (IOException ex)
             {
                 System.out.println("Erro ao enviar comando para UDP." + ex);
                 System.exit(1);
             }
+        }
+        else if(!commandsToRemote)
+        {
+            processLocalCommand(command);
         }
         else if(tcpToServer.size() > 0)
         {
@@ -176,5 +211,9 @@ public class PDCliente
                 System.exit(1);
             }
         }
+    }
+    private static void processLocalCommand(String command)
+    {
+        System.out.println("Local command not found!");
     }
 }
