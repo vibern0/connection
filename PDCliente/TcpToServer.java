@@ -42,7 +42,6 @@ public class TcpToServer
     private void registerNParams()
     {
         params = new HashMap<>();
-        params.put(Properties.COMMAND_DISCONNECT,       0);
         params.put(Properties.COMMAND_CUR_DIR_PATH,     0);
         params.put(Properties.COMMAND_REGISTER,         2);
         params.put(Properties.COMMAND_LOGIN,            2);
@@ -55,6 +54,7 @@ public class TcpToServer
         params.put(Properties.COMMAND_REMOVE_FILE,      1);
         params.put(Properties.COMMAND_UPLOAD,           1);
         params.put(Properties.COMMAND_DOWNLOAD,         1);
+        params.put(Properties.DISCONNECT_FROM_SERVER,   0);
     }
     
     public void checkCommand(String command) throws IOException

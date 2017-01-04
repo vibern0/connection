@@ -12,7 +12,7 @@ package pacliente;
  */
 public class Properties
 {
-    public static String    COMMAND_DISCONNECT          = "disconnect";
+    public static String    COMMAND_FINISH              = "finish";
     public static String    COMMAND_CUR_DIR_PATH        = "pwd";
     public static String    COMMAND_REGISTER            = "register";
     public static String    COMMAND_LOGIN               = "login";

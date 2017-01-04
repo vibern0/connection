@@ -19,4 +19,7 @@ public interface RemoteServiceInterface extends java.rmi.Remote
     
     public List<RemoteClientInterface> allServersInfo()
             throws java.rmi.RemoteException;
+    
+    public List<String> getAllObserversName()
+            throws java.rmi.RemoteException;
 }

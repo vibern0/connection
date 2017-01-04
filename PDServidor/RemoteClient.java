@@ -57,4 +57,11 @@ public class RemoteClient extends UnicastRemoteObject
             System.out.println("Utilizador " + user.getName() + " desconectado!");
         }
     }
+
+    @Override
+    public List<RemoteObserverInterface> getAllConnectedUsers()
+            throws RemoteException
+    {
+        return users;
+    }
 }

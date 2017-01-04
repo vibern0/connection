@@ -56,7 +56,7 @@ class TcpToServerReceiver implements Runnable
                 cmd = (String)oiStream.readObject();
                 runCommand(cmd, oiStream);
                 
-            }while(!cmd.equals(Properties.COMMAND_DISCONNECT));
+            }while(!cmd.equals(Properties.DISCONNECT_FROM_SERVER));
             oiStream.close();
         }
         catch (IOException | ClassNotFoundException ex)
@@ -68,9 +68,6 @@ class TcpToServerReceiver implements Runnable
     public void runCommand(String command, ObjectInputStream oiStream)
             throws ClassNotFoundException, ObjectStreamException, IOException
     {
-        if(command.equals(Properties.COMMAND_DISCONNECT))
-            return;
-        
         if(command.equals(Properties.COMMAND_CUR_DIR_PATH))
         {
             String server_output;

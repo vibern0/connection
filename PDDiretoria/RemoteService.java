@@ -111,4 +111,27 @@ public class RemoteService  extends UnicastRemoteObject
         }
         throw new RemoteException();
     }
+    
+    @Override
+    public List<String> getAllObserversName()
+            throws RemoteException
+    {
+        List<String> observers_name;
+        List<RemoteObserverInterface> tmp;
+        observers_name = new ArrayList<>();
+        
+        for(RemoteClientInterface server : servers)
+        {
+            tmp = server.getAllConnectedUsers();
+            for(RemoteObserverInterface observer : tmp)
+            {
+                if(!observers_name.contains(observer.getName()))
+                {
+                    observers_name.add(observer.getName());
+                }
+            }
+        }
+        
+        return observers_name;
+    }
 }

@@ -1,4 +1,6 @@
 
+import java.util.List;
+
 public interface RemoteClientInterface extends java.rmi.Remote
 {
     //
@@ -9,5 +11,7 @@ public interface RemoteClientInterface extends java.rmi.Remote
     public void connectUser(RemoteObserverInterface user)
             throws java.rmi.RemoteException;
     public void disconnectUser(RemoteObserverInterface user)
+            throws java.rmi.RemoteException;
+    public List<RemoteObserverInterface> getAllConnectedUsers()
             throws java.rmi.RemoteException;
 }
