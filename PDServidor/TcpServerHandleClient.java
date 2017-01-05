@@ -19,9 +19,11 @@ import java.nio.file.Files;
 import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.rmi.RemoteException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import paservidor.Database;
@@ -43,17 +45,22 @@ public class TcpServerHandleClient implements Runnable {
     private final OutputStream oStream;
     private final InputStream iStream;
     private final String serverName;
+    private String player_name;
     private String client_folder_on_server;
     private ObjectOutputStream ooStream;
     private ObjectInputStream oiStream;
+    private final RMI rmi;
     
-    public TcpServerHandleClient(Socket socket, String serverName, Database database) throws IOException
+    public TcpServerHandleClient(Socket socket, String serverName,
+            Database database, RMI rmi)
+            throws IOException
     {
         this.current_folder = "/";
         this.database = database;
         this.serverName = serverName;
         this.oStream = socket.getOutputStream();
         this.iStream = socket.getInputStream();
+        this.rmi = rmi;
     }
     
     @Override
@@ -73,7 +80,7 @@ public class TcpServerHandleClient implements Runnable {
                 runCommand(command);
                 
             }while(!command.equals(Properties.COMMAND_DISCONNECT));
-            
+            rmi.logoutUser(player_name);
             oStream.close();
             iStream.close();
             ooStream.close();
@@ -81,6 +88,14 @@ public class TcpServerHandleClient implements Runnable {
         }
         catch (IOException | ClassNotFoundException | SQLException ex)
         {
+            try
+            {
+                rmi.logoutUser(player_name);
+            }
+            catch (RemoteException ex1)
+            {
+                Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex1);
+            }
             Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
@@ -133,6 +148,8 @@ public class TcpServerHandleClient implements Runnable {
             
             if(result.equals(Properties.SUCCESS_LOGGED))
             {
+                rmi.loginUser(params[1]);
+                player_name = params[1];
                 client_folder_on_server = serverName + "/" + params[1];
             }
         }

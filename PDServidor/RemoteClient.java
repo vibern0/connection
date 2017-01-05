@@ -11,12 +11,15 @@ public class RemoteClient extends UnicastRemoteObject
     private final String serverName;
     private final ServerSocket serverSocket;
     private final List<RemoteObserverInterface> users;
-    public RemoteClient(String serverName, ServerSocket serverSocket) throws RemoteException
+    private final List<RemoteObserverInterface> users_auth;
+    public RemoteClient(String serverName, ServerSocket serverSocket)
+            throws RemoteException
     {
         //
         this.serverName = serverName;
         this.serverSocket = serverSocket;
         this.users = new ArrayList<>();
+        this.users_auth = new ArrayList<>();
     }
 
     @Override
@@ -57,11 +60,38 @@ public class RemoteClient extends UnicastRemoteObject
             System.out.println("Utilizador " + user.getName() + " desconectado!");
         }
     }
-
+    
     @Override
     public List<RemoteObserverInterface> getAllConnectedUsers()
             throws RemoteException
     {
         return users;
+    }
+
+    @Override
+    public void addAuthenticatedUser(RemoteObserverInterface user)
+            throws RemoteException
+    {
+        if(!users_auth.contains(user))
+        {
+            users_auth.add(user);
+        }
+    }
+
+    @Override
+    public void removeAuthenticatedUser(RemoteObserverInterface user)
+            throws RemoteException
+    {
+        if(users_auth.contains(user))
+        {
+            users_auth.remove(user);
+        }
+    }
+
+    @Override
+    public List<RemoteObserverInterface> getAllAuthenticatedUsers()
+            throws RemoteException
+    {
+        return users_auth;
     }
 }

@@ -12,6 +12,14 @@ public interface RemoteClientInterface extends java.rmi.Remote
             throws java.rmi.RemoteException;
     public void disconnectUser(RemoteObserverInterface user)
             throws java.rmi.RemoteException;
+    
+    public void addAuthenticatedUser(RemoteObserverInterface user)
+            throws java.rmi.RemoteException;
+    public void removeAuthenticatedUser(RemoteObserverInterface user)
+            throws java.rmi.RemoteException;
+    public List<RemoteObserverInterface> getAllAuthenticatedUsers()
+            throws java.rmi.RemoteException;
+    
     public List<RemoteObserverInterface> getAllConnectedUsers()
             throws java.rmi.RemoteException;
 }

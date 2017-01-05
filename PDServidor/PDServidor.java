@@ -62,10 +62,32 @@ public class PDServidor
             System.exit(1);
         }
         
+        RMI rmi = null;
+        try
+        {
+            rmi = new RMI(args[0], serverSocket);
+            rmi.run(args[1]);
+        }
+        catch(RemoteException e)
+        {
+            System.out.println("Erro remoto - " + e);
+            System.exit(1);
+        }
+        catch(NotBoundException e)
+        {
+            System.out.println("Servico remoto desconhecido - " + e);
+            System.exit(1);
+        }
+        catch(IOException e)
+        {
+            System.out.println("Erro E/S - " + e);
+            System.exit(1);
+        }
+        
         Thread tcp_thread = null;
         try
         {
-            tcp_thread = new TcpServer(serverSocket, args[0]);
+            tcp_thread = new TcpServer(serverSocket, args[0], rmi);
             tcp_thread.start();
         }
         catch (SQLException | ClassNotFoundException ex)
@@ -91,28 +113,6 @@ public class PDServidor
             Logger.getLogger(PDServidor.class.getName()).log(Level.SEVERE, null, ex);
             //
             return;
-        }
-        
-        RMI rmi = null;
-        try
-        {
-            rmi = new RMI(args[0], serverSocket);
-            rmi.run(args[1]);
-        }
-        catch(RemoteException e)
-        {
-            System.out.println("Erro remoto - " + e);
-            System.exit(1);
-        }
-        catch(NotBoundException e)
-        {
-            System.out.println("Servico remoto desconhecido - " + e);
-            System.exit(1);
-        }
-        catch(IOException e)
-        {
-            System.out.println("Erro E/S - " + e);
-            System.exit(1);
         }
         
         System.out.println("<Enter> para terminar...");
