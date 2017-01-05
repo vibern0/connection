@@ -20,127 +20,85 @@ public class Database {
     private Statement stmt = null;
         
     public Database(String serverName)
+            throws ClassNotFoundException, SQLException
     {
-        try
-        {
-            Class.forName("org.sqlite.JDBC");
-            c = DriverManager.getConnection("jdbc:sqlite:" + serverName + "/clients.db");
-            c.setAutoCommit(false);
-            System.out.println("Opened database successfully!");
-            createTables();
-        }
-        catch (ClassNotFoundException | SQLException ex)
-        {
-            Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        Class.forName("org.sqlite.JDBC");
+        c = DriverManager.getConnection("jdbc:sqlite:" + serverName + "/clients.db");
+        c.setAutoCommit(false);
+        System.out.println("Opened database successfully!");
+        createTables();
     }
     
-    public void close()
+    public void close() throws SQLException
     {
-        try
-        {
-            c.close();
-        }
-        catch (SQLException ex)
-        {
-            Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        c.close();
     }
     
     private void createTables()
+            throws SQLException
     {
-        try
-        {
-            stmt = c.createStatement();
-            
-            String sql = "CREATE TABLE  IF NOT EXISTS users " +
-                   "(id             INTEGER PRIMARY KEY   AUTOINCREMENT," +
-                   " name           TEXT    NOT NULL," + 
-                   " password       TEXT    NOT NULL)"; 
-            stmt.executeUpdate(sql);
+        stmt = c.createStatement();
 
-            stmt.close();
-            c.commit();
-            
-            System.out.println("Tables created!");
-        }
-        catch (SQLException ex)
-        {
-            Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        String sql = "CREATE TABLE  IF NOT EXISTS users " +
+               "(id             INTEGER PRIMARY KEY   AUTOINCREMENT," +
+               " name           TEXT    NOT NULL," + 
+               " password       TEXT    NOT NULL)"; 
+        stmt.executeUpdate(sql);
+
+        stmt.close();
+        c.commit();
+
+        System.out.println("Tables created!");
     }
     
-    public boolean addUser(String username, String password)
+    public void addUser(String username, String password)
+            throws SQLException
     {
-        try
-        {
-            stmt = c.createStatement();
-            
-            String sql = "INSERT INTO users(name, password) VALUES('" +
-                    username + "','" + password + "')"; 
-            stmt.executeUpdate(sql);
+        stmt = c.createStatement();
 
-            stmt.close();
-            c.commit();
-            
-            return true;
-        }
-        catch (SQLException ex)
-        {
-            Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return false;
+        String sql = "INSERT INTO users(name, password) VALUES('" +
+                username + "','" + password + "')"; 
+        stmt.executeUpdate(sql);
+
+        stmt.close();
+        c.commit();
     }
     
     public int checkLogin(String username, String password)
+            throws SQLException
     {
         if(!checkUser(username))
             return Properties.ERROR_ACCOUNT_NOT_FOUND;
         
-        try
+        Integer found = Properties.ERROR_WRONG_PASSWORD;
+        stmt = c.createStatement();
+        ResultSet rs = stmt.executeQuery( "SELECT * FROM users WHERE name='" +
+                username + "' AND password='" + password + "'");
+
+        if(rs.next())
         {
-            Integer found = Properties.ERROR_WRONG_PASSWORD;
-            stmt = c.createStatement();
-            ResultSet rs = stmt.executeQuery( "SELECT * FROM users WHERE name='" +
-                    username + "' AND password='" + password + "'");
-            
-            if(rs.next())
-            {
-                found = Properties.SUCCESS_LOGGED;
-            }
-            rs.close();
-            stmt.close();
-            
-            return found;
+            found = Properties.SUCCESS_LOGGED;
         }
-        catch (SQLException ex)
-        {
-            Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return Properties.ERROR_WRONG_PASSWORD;
+        rs.close();
+        stmt.close();
+
+        return found;
     }
     
     public boolean checkUser(String username)
+            throws SQLException
     {
-        try
+        boolean found = false;
+        stmt = c.createStatement();
+        ResultSet rs = stmt.executeQuery( "SELECT * FROM users WHERE name='" + username + "'");
+
+        if(rs.next())
         {
-            boolean found = false;
-            stmt = c.createStatement();
-            ResultSet rs = stmt.executeQuery( "SELECT * FROM users WHERE name='" + username + "'");
-            
-            if(rs.next())
-            {
-                found = true;
-            }
-            rs.close();
-            stmt.close();
-            
-            return found;
+            found = true;
         }
-        catch (SQLException ex)
-        {
-            Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return false;
+        rs.close();
+        stmt.close();
+
+        return found;
     }
 }

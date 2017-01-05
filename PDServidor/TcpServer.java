@@ -3,6 +3,7 @@
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.SQLException;
 import paservidor.Database;
 
 
@@ -12,6 +13,7 @@ public class TcpServer extends Thread
     private final Database database;
     private final String serverName;
     public TcpServer(ServerSocket serverSocket, String serverName)
+            throws SQLException, ClassNotFoundException
     {
         this.serverSocket = serverSocket;
         this.serverName = serverName;

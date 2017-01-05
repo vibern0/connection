@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -61,8 +62,18 @@ public class PDServidor
             System.exit(1);
         }
         
-        Thread tcp_thread = new TcpServer(serverSocket, args[0]);
-        tcp_thread.start();
+        Thread tcp_thread = null;
+        try
+        {
+            tcp_thread = new TcpServer(serverSocket, args[0]);
+            tcp_thread.start();
+        }
+        catch (SQLException | ClassNotFoundException ex)
+        {
+            System.err.println("Unable to read data from an open socket.");
+            System.err.println(ex.toString());
+            System.exit(1);
+        }
         
         try
         {
