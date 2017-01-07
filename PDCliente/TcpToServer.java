@@ -53,6 +53,12 @@ public class TcpToServer
         }
         else
         {
+            if(     command.startsWith(Properties.COMMAND_LOGIN) ||
+                    command.startsWith(Properties.COMMAND_REGISTER))
+            {
+                String [] tmp = command.split(" ");
+                command = tmp[0] + " " + PDCliente.username + " " + tmp[1];
+            }
             ooStream.writeObject(command);
             ooStream.flush();
         }

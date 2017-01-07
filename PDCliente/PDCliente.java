@@ -26,15 +26,18 @@ public class PDCliente
     private static boolean commandsToRemote;
     private static String current_server_folder;
     private static String current_folder;
+    public static String username;
     
     public static void main(String[] args)
     {    
+        HeartbeatClient hb;
         if(args.length < 3)
         {
             System.out.println("Incompleto! Parametros -> [ip UDP] [porto UDP] [username]");
             return;
         }
         
+        username = args[2];
         registerNParams();
         connectedToServers = new ArrayList<>();
         try
@@ -49,7 +52,8 @@ public class PDCliente
             return;
         }
         
-        new HeartbeatClient(udpClient.getSocket(), args[0], Integer.parseInt(args[1])).run();
+        hb = new HeartbeatClient(udpClient.getSocket(), args[0], Integer.parseInt(args[1]));
+        hb.run();
         
         rmi = new RMI(args[2]);
         try
@@ -91,6 +95,8 @@ public class PDCliente
 
         } while(!command.equals(Properties.COMMAND_FINISH));
         
+        hb.close();
+        udpClient.finish();
         try
         {
             rmi.close();
@@ -175,7 +181,10 @@ public class PDCliente
                     System.out.println("Clients online:");
                     for(String client : clients)
                     {
-                        System.out.println(client);
+                        if(!client.equals(username))
+                        {
+                            System.out.println(client);
+                        }
                     }
                 }
                 //message to client
@@ -204,7 +213,7 @@ public class PDCliente
                         System.out.println(rmi.getServerIP(params[1]) + " " + rmi.getServerPort(params[1]));
                         connectedToServers.add(params[1]);
                         TcpToServer tcp = new TcpToServer(
-                                "127.0.0.1",
+                                rmi.getServerIP(params[1]),
                                 rmi.getServerPort(params[1]),
                                 params[1]
                         );
@@ -232,72 +241,41 @@ public class PDCliente
                         System.out.println("É necessário dizer o nome do servidor!");
                         return;
                     }
-                    if(params[1].equals("all"))
+                    if(!connectedToServers.contains(params[1]))
                     {
-                        for(String serverName : connectedToServers)
-                        {
-                            try
-                            {
-                                tcpToServer.get(toServer).checkCommand(
-                                        Properties.DISCONNECT_FROM_SERVER);
-                                rmi.disconnectFromServer(serverName);
-                                tcpToServer.get(toServer).close();
-                                tcpToServer.remove(toServer);
-                                connectedToServers.remove(serverName);
-                            }
-                            catch (IOException ex)
-                            {
-                                System.out.println(
-                                        "Erro ao enviar comando para TCP." + ex);
-                                System.exit(1);
-                            }
-                            catch (InterruptedException ex)
-                            {
-                                System.out.println("Erro na conexao TCP." + ex);
-                                System.exit(1);
-                            }
-                        }
+                        System.out.println(
+                                "Nao esta conectado a esse servidor!");
+                        return;
+                    }
+                    //
+                    List<String> servers = rmi.getAllServersName();
+                    if(!servers.contains(params[1]))
+                    {
+                        System.out.println("Servidor nao encontrado!");
+                        return;
+                    }
+                    //
+                    try
+                    {
+                        tcpToServer.get(toServer).checkCommand(params[0]);
+                        rmi.disconnectFromServer(params[1]);
+                        tcpToServer.get(toServer).close();
+                        tcpToServer.remove(toServer);
+                        connectedToServers.remove(params[1]);
                         toServer = -1;
+                        System.out.println("Voce desconctou-se do servidor!");
+                        System.out.println("Conecte-se a outro servidor!");
                     }
-                    else
+                    catch (IOException ex)
                     {
-                        if(!connectedToServers.contains(params[1]))
-                        {
-                            System.out.println(
-                                    "Nao esta conectado a esse servidor!");
-                            return;
-                        }
-                        //
-                        List<String> servers = rmi.getAllServersName();
-                        if(!servers.contains(params[1]))
-                        {
-                            System.out.println("Servidor nao encontrado!");
-                            return;
-                        }
-                        //
-                        try
-                        {
-                            tcpToServer.get(toServer).checkCommand(params[0]);
-                            rmi.disconnectFromServer(params[1]);
-                            tcpToServer.get(toServer).close();
-                            tcpToServer.remove(toServer);
-                            connectedToServers.remove(params[1]);
-                            toServer = -1;
-                            System.out.println("Voce desconctou-se do servidor!");
-                            System.out.println("Conecte-se a outro servidor!");
-                        }
-                        catch (IOException ex)
-                        {
-                            System.out.println("Erro ao enviar comando para TCP." + ex);
-                            System.exit(1);
-                        }
-                        catch (InterruptedException ex)
-                        {
-                            System.out.println("Erro na conexao TCP." + ex);
-                            System.exit(1);
-                        }
+                        System.out.println("Erro ao enviar comando para TCP." + ex);
+                        System.exit(1);
                     }
-                    
+                    catch (InterruptedException ex)
+                    {
+                        System.out.println("Erro na conexao TCP." + ex);
+                        System.exit(1);
+                    }
                 }
             }
             catch (IOException ex)
@@ -474,8 +452,8 @@ public class PDCliente
     
     private static void registerNParams()
     {
-        Properties.params.put(Properties.COMMAND_REGISTER,          2);
-        Properties.params.put(Properties.COMMAND_LOGIN,             2);
+        Properties.params.put(Properties.COMMAND_REGISTER,          1);
+        Properties.params.put(Properties.COMMAND_LOGIN,             1);
         Properties.params.put(Properties.COMMAND_CREATE_DIRECTORY,  1);
         Properties.params.put(Properties.COMMAND_CHANGE_DIRECTORY,  1);
         Properties.params.put(Properties.COMMAND_COPY_FILE,         2);

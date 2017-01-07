@@ -32,9 +32,12 @@ public class UdpClient extends Thread
         try
         {
             socket.receive(packet);
-        } catch (IOException ex) { ex.printStackTrace(); }
-        
-        //do shit
+        }
+        catch (IOException ex)
+        {
+            System.out.println("Ligacao UDP perdida!");
+            System.exit(1);
+        }
     }
     
     public void sendCommand(String command) throws IOException

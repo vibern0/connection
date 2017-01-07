@@ -66,11 +66,11 @@ class TcpToServerReceiver implements Runnable
         }
         catch (IOException | ClassNotFoundException ex)
         {
-            Logger.getLogger(TcpToServerReceiver.class.getName()).log(Level.SEVERE, null, ex);
             if(!toClose)
             {
                 System.out.println("Ligacao TCP perdida!");
             }
+            Logger.getLogger(TcpToServerReceiver.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     

@@ -44,4 +44,8 @@ public class HeartbeatClient
         };
         scheduler.scheduleAtFixedRate(heartbeat, 0, HEARTBEAT_TIME, SECONDS);
     }
+    public void close()
+    {
+        scheduler.shutdownNow();
+    }
 }

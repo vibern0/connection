@@ -1,9 +1,12 @@
 
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.rmi.*;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class RemoteClient extends UnicastRemoteObject
         implements RemoteClientInterface
@@ -31,7 +34,7 @@ public class RemoteClient extends UnicastRemoteObject
     @Override
     public String getIP() throws RemoteException
     {
-        return serverSocket.getInetAddress().getHostAddress();
+        return serverSocket.getInetAddress().getHostName();
     }
     
     @Override
