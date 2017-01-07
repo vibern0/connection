@@ -3,8 +3,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -36,7 +34,7 @@ public class PDMonitorizar {
         }
         catch (RemoteException | NotBoundException | MalformedURLException ex)
         {
-            Logger.getLogger(PDMonitorizar.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("Erro na ligacao RMI");
             System.exit(1);
         }
         

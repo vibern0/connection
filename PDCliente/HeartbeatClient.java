@@ -4,7 +4,7 @@ import java.net.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static pacliente.Properties.*;
+import static pdcliente.Properties.*;
 
 
 public class HeartbeatClient

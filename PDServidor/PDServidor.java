@@ -8,8 +8,6 @@ import java.nio.file.Paths;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class PDServidor
 {   
@@ -31,7 +29,7 @@ public class PDServidor
             }
             catch (IOException ex)
             {
-                Logger.getLogger(PDServidor.class.getName()).log(Level.SEVERE, null, ex);
+                System.out.println("Erro ao criar diretorio");
                 System.exit(1);
             }
         }
@@ -51,13 +49,13 @@ public class PDServidor
         }
         catch (SocketException se)
         {
-            System.err.println("Unable to create socket.");
+            System.err.println("Erro ao criar o socket.");
             System.err.println(se.toString());
             System.exit(1);
         }
         catch (IOException ioe)
         {
-            System.err.println("Unable to read data from an open socket.");
+            System.err.println("Erro ao ler dados do socket.");
             System.err.println(ioe.toString());
             System.exit(1);
         }
@@ -92,7 +90,7 @@ public class PDServidor
         }
         catch (SQLException | ClassNotFoundException ex)
         {
-            System.err.println("Unable to read data from an open socket.");
+            System.err.println("Erro ao iniciar base de dados.");
             System.err.println(ex.toString());
             System.exit(1);
         }
@@ -110,7 +108,6 @@ public class PDServidor
                 serverSocket.close();
             } catch (IOException ex1) { }
             //
-            Logger.getLogger(PDServidor.class.getName()).log(Level.SEVERE, null, ex);
             //
             return;
         }
