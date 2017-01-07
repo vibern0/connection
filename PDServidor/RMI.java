@@ -30,11 +30,8 @@ public class RMI {
         List<RemoteObserverInterface> users = remoteClient.getAllConnectedUsers();
         for(RemoteObserverInterface user : users)
         {
-            System.out.println(user.getName());
-            System.out.println(username);
             if(user.getName().equals(username))
             {
-                System.out.println(username);
                 remoteService.loginUser(user, remoteClient);
                 remoteClient.addAuthenticatedUser(user);
                 break;

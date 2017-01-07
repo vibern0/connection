@@ -34,7 +34,7 @@ public class RemoteClient extends UnicastRemoteObject
     @Override
     public String getIP() throws RemoteException
     {
-        return serverSocket.getInetAddress().getHostName();
+        return serverSocket.getInetAddress().getHostAddress();
     }
     
     @Override

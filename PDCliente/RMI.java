@@ -68,7 +68,8 @@ public class RMI {
         return server.getIP();
     }
     
-    public int getServerPort(String serverName) throws RemoteException
+    public int getServerPort(String serverName)
+            throws RemoteException
     {
         RemoteClientInterface server =
                 remoteService.searchServerByName(serverName);

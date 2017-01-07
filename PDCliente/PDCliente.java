@@ -52,7 +52,8 @@ public class PDCliente
             return;
         }
         
-        hb = new HeartbeatClient(udpClient.getSocket(), args[0], Integer.parseInt(args[1]));
+        hb = new HeartbeatClient(udpClient.getSocket(), args[0],
+                Integer.parseInt(args[1]), username);
         hb.run();
         
         rmi = new RMI(args[2]);
@@ -187,8 +188,12 @@ public class PDCliente
                         }
                     }
                 }
-                //message to client
-                //message to all
+                else if(command.startsWith(Properties.MESSAGE_TO_CLIENT) ||
+                        command.startsWith(Properties.MESSAGE_TO_ALL))
+                {
+                    udpClient.sendCommand(command);
+                    udpClient.sendCommand(username);
+                }
                 else if(command.startsWith(Properties.CONNECT_TO_SERVER))
                 {
                     String [] params = command.split(" ");
@@ -479,6 +484,6 @@ public class PDCliente
             return true;
         }
         Integer nparams = Properties.params.get(ps[0]);
-        return ps.length - 1 == nparams;
+        return ps.length - 1 >= nparams;
     }
 }

@@ -71,6 +71,7 @@ public class Properties
     
     //Comandos para o servico de diretoria
     public static String    COMMAND_HEARTBEAT           = "hearbeat_cliente";
+    public static String    MESSAGE_CLIENT_NOT_FOUND    = "nfpm";
     public static final int MAX_DPACK_SIZE              = 256;
     public static final int HEARTBEAT_TIME              = 4;
     
