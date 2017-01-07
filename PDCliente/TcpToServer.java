@@ -1,6 +1,6 @@
 
 
-import pacliente.Properties;
+import pdcliente.Properties;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
@@ -44,12 +44,12 @@ public class TcpToServer
                 && (!command.startsWith(Properties.COMMAND_LOGIN) &&
                 !command.startsWith(Properties.COMMAND_REGISTER)))
         {
-            System.out.println("You are not logged yet!");
+            System.out.println("Voce ainda nao esta autenticado!");
         }
         else if(TcpToServerReceiver.connectedTo.contains(socket)
                 && command.startsWith(Properties.COMMAND_LOGIN))
         {
-            System.out.println("You are already logged!");
+            System.out.println("Voce ja esta autenticado!");
         }
         else
         {

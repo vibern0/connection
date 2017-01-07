@@ -5,8 +5,6 @@ import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class UdpClients extends Thread {
 
@@ -84,7 +82,6 @@ public class UdpClients extends Thread {
             }
             catch (IOException ex) { ex.printStackTrace(); }
             input_sock = new String(packet.getData(), 0, packet.getLength());
-            System.out.println(input_sock);
             if(input_sock.startsWith(Properties.HEARTBEAT_CLIENT))
             {
                 registry = packet.getAddress().getHostAddress() + ":" + packet.getPort();
@@ -118,9 +115,7 @@ public class UdpClients extends Thread {
                     socket.receive(packet_user);
                 }
                 catch (IOException ex)
-                {
-                    Logger.getLogger(UdpClients.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                { }
                 username = new String(packet_user.getData(), 0, packet_user.getLength());
                 //
                 for(String client : clients)
@@ -141,13 +136,9 @@ public class UdpClients extends Thread {
                         socket.send(packet_send);
                     }
                     catch (UnknownHostException ex)
-                    {
-                        Logger.getLogger(UdpClients.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+                    { }
                     catch (IOException ex)
-                    {
-                        Logger.getLogger(UdpClients.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+                    { }
                 }
             }
             else if(input_sock.startsWith(Properties.MESSAGE_TO_CLIENT))
@@ -169,13 +160,9 @@ public class UdpClients extends Thread {
                         socket.send(packet_send);
                     }
                     catch (UnknownHostException ex)
-                    {
-                        Logger.getLogger(UdpClients.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+                    { }
                     catch (IOException ex)
-                    {
-                        Logger.getLogger(UdpClients.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+                    { }
                     continue;
                 }
                 
@@ -184,9 +171,7 @@ public class UdpClients extends Thread {
                     socket.receive(packet_user);
                 }
                 catch (IOException ex)
-                {
-                    Logger.getLogger(UdpClients.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                { }
                 username = new String(packet_user.getData(), 0, packet_user.getLength());
                 //
                 System.out.println(pms[1]);
@@ -209,13 +194,9 @@ public class UdpClients extends Thread {
                     socket.send(packet_send);
                 }
                 catch (UnknownHostException ex)
-                {
-                    Logger.getLogger(UdpClients.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                { }
                 catch (IOException ex)
-                {
-                    Logger.getLogger(UdpClients.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                { }
             }
         } while(true);
     }

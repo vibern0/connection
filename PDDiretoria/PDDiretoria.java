@@ -3,8 +3,6 @@ import java.io.IOException;
 import java.net.SocketException;
 import java.rmi.AlreadyBoundException;
 import java.rmi.RemoteException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class PDDiretoria
 {
@@ -61,7 +59,8 @@ public class PDDiretoria
         }
         catch (AlreadyBoundException ex)
         {
-            Logger.getLogger(PDDiretoria.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("Este sistema RMI ja esta em execucao");
+            System.exit(1);
         }
         
         System.out.println("<Enter> para terminar...");

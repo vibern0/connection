@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import paservidor.Properties;
+import pdservidor.Properties;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -22,11 +22,7 @@ import java.nio.file.Paths;
 import java.rmi.RemoteException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import paservidor.Database;
+import pdservidor.Database;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -94,9 +90,8 @@ public class TcpServerHandleClient implements Runnable {
             }
             catch (RemoteException ex1)
             {
-                Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex1);
+                System.out.println("Excecao remota ao efetuar logout");
             }
-            Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
@@ -260,7 +255,7 @@ public class TcpServerHandleClient implements Runnable {
             Path source = Paths.get(client_folder_on_server +
                     current_folder + params[1]);
             Path newdir = Paths.get(client_folder_on_server +
-                    current_folder + params[2] + "/" + params[1]);
+                    current_folder + params[2]);
             Path ret = Files.move(source, newdir);
             
             ooStream.writeObject(Properties.COMMAND_MOVE_FILE);
@@ -355,7 +350,16 @@ public class TcpServerHandleClient implements Runnable {
             String [] params = command.split(" ");
             ooStream.writeObject(Properties.COMMAND_DOWNLOAD);
             
-            File file = new File(params[1]);
+            if(params[1].charAt(0) != '/')
+            {
+                params[1] = '/' + params[1];
+            }
+            if(params[1].lastIndexOf("/") != params[1].length() - 1)
+            {
+                params[1] += '/';
+            }
+            
+            File file = new File(client_folder_on_server + params[1]);
             long length = file.length();
             byte[] bytes = new byte[1024];
             try
@@ -376,6 +380,7 @@ public class TcpServerHandleClient implements Runnable {
             }
             catch(FileNotFoundException ex)
             {
+                ex.printStackTrace();
                 ooStream.writeObject(Properties.ERROR_DOWLOAD_FILE);
                 ooStream.flush();
             }

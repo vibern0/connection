@@ -1,4 +1,4 @@
-package pacliente;
+package pdcliente;
 
 import java.util.HashMap;
 import java.util.Map;

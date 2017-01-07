@@ -1,7 +1,7 @@
 import java.net.*;
 import java.io.*;
-import pacliente.Properties;
-import static pacliente.Properties.*;
+import pdcliente.Properties;
+import static pdcliente.Properties.*;
 
 public class UdpClient extends Thread
 {

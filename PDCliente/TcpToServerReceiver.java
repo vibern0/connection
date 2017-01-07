@@ -3,19 +3,17 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import pacliente.Properties;
+import pdcliente.Properties;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.ObjectStreamException;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -35,7 +33,7 @@ class TcpToServerReceiver implements Runnable
     private boolean toClose;
     private final String root_folder;
     
-    public TcpToServerReceiver(Socket socket, String serverName)
+    public TcpToServerReceiver(Socket socket, String serverName) throws IOException
     {
         this.socket = socket;
         if(connectedTo == null)
@@ -44,6 +42,7 @@ class TcpToServerReceiver implements Runnable
         }
         this.toClose = false;
         this.root_folder = "remote" + serverName;
+        Files.createDirectories(Paths.get("remote" + serverName));
     }
 
     @Override
@@ -70,7 +69,6 @@ class TcpToServerReceiver implements Runnable
             {
                 System.out.println("Ligacao TCP perdida!");
             }
-            Logger.getLogger(TcpToServerReceiver.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
@@ -86,16 +84,16 @@ class TcpToServerReceiver implements Runnable
         {
             String server_output;
             server_output = (String)oiStream.readObject();
-            System.out.println("Actual path is '" + server_output + "'");
+            System.out.println("A pasta atual e '" + server_output + "'");
         }
         else if(command.startsWith(Properties.COMMAND_REGISTER))
         {
             Integer output_type;
             output_type = (Integer)oiStream.readObject();
             if(output_type.equals(Properties.SUCCESS_REGISTER))
-                System.out.println("You are successfully registered! Login now.");
+                System.out.println("Registado com sucesso. Efetue autenticacao.");
             else if(output_type.equals(Properties.ERROR_ALREADY_REGISTERED))
-                System.out.println("You are already registered.");
+                System.out.println("Voce ja esta registado.");
         }
         else if(command.startsWith(Properties.COMMAND_LOGIN))
         {
@@ -104,30 +102,26 @@ class TcpToServerReceiver implements Runnable
             if(output_type.equals(Properties.SUCCESS_LOGGED))
             {
                 TcpToServerReceiver.connectedTo.add(socket);
-                System.out.println("You are logged now.");
+                System.out.println("Autenticado com sucesso.");
             }
             else if(output_type.equals(Properties.ERROR_WRONG_PASSWORD))
-                System.out.println("Erong login password.");
+                System.out.println("Senha erada.");
             else if(output_type.equals(Properties.ERROR_ACCOUNT_NOT_FOUND))
-                System.out.println("You are not registered.");
+                System.out.println("Voce nao esta registado.");
         }
         else if(command.startsWith(Properties.COMMAND_LOGOUT))
         {
             Integer output_type;
             output_type = (Integer)oiStream.readObject();
             if(output_type.equals(Properties.SUCCESS_LOGOUT))
-                System.out.println("You are unlogged now!");
-            else if(output_type.equals(Properties.ERROR_NOT_LOGGED))
-                System.out.println("You are not logged yet.");
+                System.out.println("Sessao terminada!");
         }
         else if(command.equals(Properties.COMMAND_CREATE_DIRECTORY))
         {
             Integer output_type;
             output_type = (Integer)oiStream.readObject();
             if(output_type.equals(Properties.SUCCESS_CREATE_DIRECTORY))
-                System.out.println("Directory created!");
-            else if(output_type.equals(Properties.ERROR_NOT_LOGGED))
-                System.out.println("You are not logged yet.");
+                System.out.println("Diretorio criado!");
         }
         else if(command.equals(Properties.COMMAND_LIST_CONTENT))
         {
@@ -147,36 +141,36 @@ class TcpToServerReceiver implements Runnable
             Integer output_type;
             output_type = (Integer)oiStream.readObject();
             if(output_type.equals(Properties.ERROR_ON_ROOT_FOLDER))
-                System.out.println("You are on root folder.");
+                System.out.println("Voce ja esta na pasta raiz.");
             else if(output_type.equals(Properties.SUCCESS_CHANGE_DIRECTORY))
-                System.out.println("You moved to another folder.");
+                System.out.println("Voce esta agora noutra pasta.");
         }
         else if(command.equals(Properties.COMMAND_COPY_FILE))
         {
             Integer output_type;
             output_type = (Integer)oiStream.readObject();
             if(output_type.equals(Properties.ERROR_WHEN_COPY_FILE))
-                System.out.println("Error when copy file.");
+                System.out.println("Erro ao copiar o ficheiro.");
             else if(output_type.equals(Properties.SUCCESS_WHEN_COPY_FILE))
-                System.out.println("File successfully copied!.");
+                System.out.println("Ficheiro copiado!.");
         }
         else if(command.equals(Properties.COMMAND_MOVE_FILE))
         {
             Integer output_type;
             output_type = (Integer)oiStream.readObject();
             if(output_type.equals(Properties.ERROR_WHEN_MOVE_FILE))
-                System.out.println("Error moving file.");
+                System.out.println("Erro ao mover o ficheiro.");
             else if(output_type.equals(Properties.SUCCESS_WHEN_MOVE_FILE))
-                System.out.println("You moved the file.");
+                System.out.println("Ficheiro movido.");
         }
         else if(command.equals(Properties.COMMAND_REMOVE_FILE))
         {
             Integer output_type;
             output_type = (Integer)oiStream.readObject();
             if(output_type.equals(Properties.ERROR_WHEN_REMOVE_FILE))
-                System.out.println("Error removing file.");
+                System.out.println("Erro ao eliminar o ficheiro.");
             else if(output_type.equals(Properties.SUCCESS_WHEN_REMOVE_FILE))
-                System.out.println("Success removing file.");
+                System.out.println("Ficheiro eliminado.");
         }
         else if(command.equals(Properties.COMMAND_UPLOAD))
         {
@@ -184,7 +178,7 @@ class TcpToServerReceiver implements Runnable
             output_type = (Integer)oiStream.readObject();
             if(output_type.equals(Properties.ERROR_UPLOAD_FILE))
             {
-                System.out.println("Error uploading file.");
+                System.out.println("Erro ao fazer upload do ficheiro.");
             }
             else if(output_type.equals(Properties.SUCCESS_UPLOAD_FILE))
             {
@@ -207,7 +201,7 @@ class TcpToServerReceiver implements Runnable
                     {
                         ostream.write(bytes, 0, count);
                     }
-                    System.out.println("File uploaded.");
+                    System.out.println("Upload efetuado.");
                     in.close();
                 }
                 catch(FileNotFoundException ex)
@@ -232,15 +226,15 @@ class TcpToServerReceiver implements Runnable
             {
                 command = (String)oiStream.readObject();
                 String [] params = command.split(" ");
-                if(params[2].charAt(0) != '/')
+                if(params[1].charAt(0) != '/')
                 {
-                    params[2] = '/' + params[2];
+                    params[1] = '/' + params[1];
                 }
-                if(params[2].lastIndexOf("/") != params[2].length())
+                if(params[1].lastIndexOf("/") != params[1].length() - 1)
                 {
-                    params[2] += '/';
+                    params[1] += '/';
                 }
-                OutputStream out = new FileOutputStream(params[2] + params[1]);
+                OutputStream out = new FileOutputStream(root_folder + params[1] + params[0]);
                 byte[] bytes = new byte[1024];
                 
                 long length = (Long)oiStream.readObject();
@@ -255,11 +249,11 @@ class TcpToServerReceiver implements Runnable
                     atual_length += count;
                 }
                 out.close();
-                System.out.println("File dowloaded. ");
+                System.out.println("Ficheiro descarregado. ");
             }
             catch (FileNotFoundException ex)
             {
-                System.out.println("File not found. ");
+                System.out.println("Ficheiro nao encontrado. ");
             }
         }
     }

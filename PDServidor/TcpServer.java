@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.sql.SQLException;
-import paservidor.Database;
+import pdservidor.Database;
 
 
 public class TcpServer extends Thread
@@ -38,13 +38,13 @@ public class TcpServer extends Thread
         }
         catch (SecurityException se)
         {
-            System.err.println("Unable to get host address due to security.");
+            System.err.println("Erro ao obter o endereco, por questoes de seguranca.");
             System.err.println(se.toString());
             System.exit(1);
         }
         catch (IOException ioe)
         {
-            System.err.println("Unable to read data from an open socket.");
+            System.err.println("Erro ao ler dados do socket.");
             System.err.println(ioe.toString());
             System.exit(1);
         }
@@ -56,7 +56,7 @@ public class TcpServer extends Thread
             }
             catch (IOException ioe)
             {
-                System.err.println("Unable to close an open socket.");
+                System.err.println("Erro ao abrir o socket.");
                 System.err.println(ioe.toString());
                 System.exit(1);
             }

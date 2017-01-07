@@ -12,9 +12,7 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import pacliente.Properties;
+import pdcliente.Properties;
 
 public class PDCliente
 {
@@ -83,7 +81,7 @@ public class PDCliente
         sc = new Scanner(System.in);
         do
         {
-            System.out.print("Command:");
+            System.out.print("Comando:");
             command = sc.nextLine();
             if(checkParams(command))
             {
@@ -91,7 +89,7 @@ public class PDCliente
             }
             else
             {
-                System.out.println("Parameters missing!");
+                System.out.println("Faltam parametros!");
             }
 
         } while(!command.equals(Properties.COMMAND_FINISH));
@@ -113,7 +111,7 @@ public class PDCliente
     {
         if(command.equals("help"))
         {
-            System.out.println("Help wanted! :");
+            System.out.println("Ajuda! :");
             //mostra todos os comandos
         }
         if(command.startsWith(Properties.CHANGE_SERVER))
@@ -162,7 +160,7 @@ public class PDCliente
                 if(command.startsWith(Properties.LIST_SERVERS))
                 {
                     List<String> serversN = rmi.getAllServersName();
-                    System.out.println("Servers available:");
+                    System.out.println("Servidores disponiveis:");
                     for(String name : serversN)
                     {
                         if(!connectedToServers.contains(name))
@@ -179,7 +177,7 @@ public class PDCliente
                 else if(command.startsWith(Properties.LIST_CLIENTS))
                 {
                     List<String> clients = rmi.getAllOnlineClients();
-                    System.out.println("Clients online:");
+                    System.out.println("Clientes online:");
                     for(String client : clients)
                     {
                         if(!client.equals(username))
@@ -296,9 +294,7 @@ public class PDCliente
                 processLocalCommand(command);
             }
             catch (IOException ex)
-            {
-                Logger.getLogger(PDCliente.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            { }
         }
         else if(tcpToServer.size() > 0)
         {
