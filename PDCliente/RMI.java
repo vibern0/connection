@@ -42,11 +42,23 @@ public class RMI {
         return values;
     }
     
+    public List<String> getAllOnlineClients() throws RemoteException
+    {
+        return remoteService.getAllObserversName();
+    }
+    
     public void connectToServer(String serverName) throws RemoteException
     {
         RemoteClientInterface server =
                 remoteService.searchServerByName(serverName);
         server.connectUser(observer);
+    }
+    
+    public void disconnectFromServer(String serverName) throws RemoteException
+    {
+        RemoteClientInterface server =
+                remoteService.searchServerByName(serverName);
+        server.disconnectUser(observer);
     }
     
     public String getServerIP(String serverName) throws RemoteException
@@ -56,7 +68,8 @@ public class RMI {
         return server.getIP();
     }
     
-    public int getServerPort(String serverName) throws RemoteException
+    public int getServerPort(String serverName)
+            throws RemoteException
     {
         RemoteClientInterface server =
                 remoteService.searchServerByName(serverName);

@@ -19,7 +19,11 @@ import java.nio.file.Files;
 import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.rmi.RemoteException;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import paservidor.Database;
@@ -41,14 +45,22 @@ public class TcpServerHandleClient implements Runnable {
     private final OutputStream oStream;
     private final InputStream iStream;
     private final String serverName;
+    private String player_name;
+    private String client_folder_on_server;
+    private ObjectOutputStream ooStream;
+    private ObjectInputStream oiStream;
+    private final RMI rmi;
     
-    public TcpServerHandleClient(Socket socket, String serverName, Database database) throws IOException
+    public TcpServerHandleClient(Socket socket, String serverName,
+            Database database, RMI rmi)
+            throws IOException
     {
         this.current_folder = "/";
         this.database = database;
         this.serverName = serverName;
         this.oStream = socket.getOutputStream();
         this.iStream = socket.getInputStream();
+        this.rmi = rmi;
     }
     
     @Override
@@ -57,35 +69,42 @@ public class TcpServerHandleClient implements Runnable {
         
         try
         {
-            byte [] bytes = new byte[1024];
             String command;
             //
-            ObjectOutputStream ooStream = new ObjectOutputStream(oStream);
-            ObjectInputStream oiStream = new ObjectInputStream(iStream);
+            ooStream = new ObjectOutputStream(oStream);
+            oiStream = new ObjectInputStream(iStream);
             
             do
             {
                 command = (String)oiStream.readObject();
-                runCommand(command, ooStream);
+                runCommand(command);
                 
             }while(!command.equals(Properties.COMMAND_DISCONNECT));
-            
+            rmi.logoutUser(player_name);
             oStream.close();
             iStream.close();
             ooStream.close();
             oiStream.close();
         }
-        catch (IOException | ClassNotFoundException ex)
+        catch (IOException | ClassNotFoundException | SQLException ex)
         {
+            try
+            {
+                rmi.logoutUser(player_name);
+            }
+            catch (RemoteException ex1)
+            {
+                Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex1);
+            }
             Logger.getLogger(TcpServerHandleClient.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
-    public void runCommand(String command, ObjectOutputStream ooStream)
+    public void runCommand(String command)
             throws ObjectStreamException, FileAlreadyExistsException,
                 SecurityException, UnsupportedOperationException,
                 NotDirectoryException, DirectoryNotEmptyException,
-                UnsupportedOperationException, IOException
+                UnsupportedOperationException, IOException, SQLException, ClassNotFoundException
     {
         if(command.equals(Properties.COMMAND_DISCONNECT))
             return;
@@ -108,12 +127,13 @@ public class TcpServerHandleClient implements Runnable {
             }
             else
             {
-                if(database.addUser(params[1], params[2]))
-                {
-                    ooStream.writeObject(Properties.COMMAND_REGISTER);
-                    ooStream.writeObject(Properties.SUCCESS_REGISTER);
-                    ooStream.flush();
-                }
+                database.addUser(params[1], params[2]);
+                Files.createDirectories(Paths.get(
+                        serverName + "/" + params[1]));
+
+                ooStream.writeObject(Properties.COMMAND_REGISTER);
+                ooStream.writeObject(Properties.SUCCESS_REGISTER);
+                ooStream.flush();
             }
         }
         else if(command.startsWith(Properties.COMMAND_LOGIN))
@@ -125,6 +145,13 @@ public class TcpServerHandleClient implements Runnable {
             ooStream.writeObject(Properties.COMMAND_LOGIN);
             ooStream.writeObject(result);
             ooStream.flush();
+            
+            if(result.equals(Properties.SUCCESS_LOGGED))
+            {
+                rmi.loginUser(params[1]);
+                player_name = params[1];
+                client_folder_on_server = serverName + "/" + params[1];
+            }
         }
         else if(command.equals(Properties.COMMAND_LOGOUT))
         {
@@ -136,10 +163,8 @@ public class TcpServerHandleClient implements Runnable {
         {
             String [] params = command.split(" ");
             
-            Path currentRelativePath = Paths.get(serverName);
-            String path = currentRelativePath.toAbsolutePath().toString();
-
-            Files.createDirectories(Paths.get(path + current_folder + params[1]));
+            Files.createDirectories(Paths.get(client_folder_on_server +
+                    current_folder + params[1]));
 
             ooStream.writeObject(Properties.COMMAND_CREATE_DIRECTORY);
             ooStream.writeObject(Properties.SUCCESS_CREATE_DIRECTORY);
@@ -148,9 +173,7 @@ public class TcpServerHandleClient implements Runnable {
         else if(command.equals(Properties.COMMAND_LIST_CONTENT))
         {
             ArrayList<String> content = new ArrayList<>();
-            Path currentRelativePath = Paths.get(serverName);
-            String path = currentRelativePath.toAbsolutePath().toString();
-            Path dir = Paths.get(path + current_folder);
+            Path dir = Paths.get(client_folder_on_server + current_folder);
                 
             DirectoryStream<Path> stream = Files.newDirectoryStream(dir);
             for (Path file: stream)
@@ -165,10 +188,6 @@ public class TcpServerHandleClient implements Runnable {
         else if(command.startsWith(Properties.COMMAND_CHANGE_DIRECTORY))
         {
             String [] params = command.split(" ");
-            
-            ArrayList<String> content = new ArrayList<>();
-            Path currentRelativePath = Paths.get(serverName);
-            String path = currentRelativePath.toAbsolutePath().toString();
             
             String [] moves = params[1].split("/");
             boolean success = true;
@@ -194,7 +213,8 @@ public class TcpServerHandleClient implements Runnable {
                     current_folder += move + "/";
                 }   
 
-                if (!Files.exists(Paths.get(path + current_folder)))
+                if (!Files.exists(Paths.get(client_folder_on_server
+                        + current_folder)))
                 {
                     success = false;
                     break;
@@ -216,11 +236,10 @@ public class TcpServerHandleClient implements Runnable {
         {
             String [] params = command.split(" ");
             
-            Path currentRelativePath = Paths.get(serverName);
-            String path = currentRelativePath.toAbsolutePath().toString();
-            
-            Path source = Paths.get(path + current_folder + params[1]);
-            Path newdir = Paths.get(path + current_folder + params[2] + "/" + params[1]);
+            Path source = Paths.get(client_folder_on_server +
+                    current_folder + params[1]);
+            Path newdir = Paths.get(client_folder_on_server +
+                    current_folder + params[2] + "/" + params[1]);
             Path ret = Files.copy(source, newdir);
             
             ooStream.writeObject(Properties.COMMAND_COPY_FILE);
@@ -238,11 +257,10 @@ public class TcpServerHandleClient implements Runnable {
         {
             String [] params = command.split(" ");
             
-            Path currentRelativePath = Paths.get(serverName);
-            String path = currentRelativePath.toAbsolutePath().toString();
-            
-            Path source = Paths.get(path + current_folder + params[1]);
-            Path newdir = Paths.get(path + current_folder + params[2] + "/" + params[1]);
+            Path source = Paths.get(client_folder_on_server +
+                    current_folder + params[1]);
+            Path newdir = Paths.get(client_folder_on_server +
+                    current_folder + params[2] + "/" + params[1]);
             Path ret = Files.move(source, newdir);
             
             ooStream.writeObject(Properties.COMMAND_MOVE_FILE);
@@ -260,10 +278,8 @@ public class TcpServerHandleClient implements Runnable {
         {
             String [] params = command.split(" ");
             
-            Path currentRelativePath = Paths.get(serverName);
-            String path = currentRelativePath.toAbsolutePath().toString();
-            
-            File file = new File(path + current_folder + params[1]);
+            File file = new File(client_folder_on_server +
+                    current_folder + params[1]);
             ooStream.writeObject(Properties.COMMAND_REMOVE_FILE);
             if(!file.exists())
             {
@@ -291,62 +307,78 @@ public class TcpServerHandleClient implements Runnable {
         else if(command.startsWith(Properties.COMMAND_UPLOAD))
         {
             String [] params = command.split(" ");
-            
-            OutputStream out = null;
+            ooStream.writeObject(Properties.COMMAND_UPLOAD);
+            if(params[2].charAt(0) != '/')
+            {
+                params[2] = '/' + params[2];
+            }
+            if(params[2].lastIndexOf("/") != params[2].length() - 1)
+            {
+                params[2] += '/';
+            }
             try
             {
-                out = new FileOutputStream(params[1]);
+                System.out.println(client_folder_on_server +
+                        params[2] + params[1]);
+                OutputStream out = new FileOutputStream(client_folder_on_server +
+                        params[2] + params[1]);
+                //
+                ooStream.writeObject(Properties.SUCCESS_UPLOAD_FILE);
+                ooStream.writeObject(params[1]);
+                ooStream.flush();
+                
+                System.out.println("a");
+                long length = (Long)oiStream.readObject();
+                System.out.println(length);
+                System.out.println("a");
+                
+                byte[] bytes = new byte[1024];
+                long atual_length = 0;
+                int count;
+                while (atual_length < length)
+                {
+                    count = iStream.read(bytes);
+                    out.write(bytes, 0, count);
+                    out.flush();
+                    atual_length += count;
+                }
+                out.close();
             }
             catch (FileNotFoundException ex)
             {
-                System.out.println("File not found. ");
-            }
-            
-            ooStream.writeObject(Properties.COMMAND_UPLOAD);
-            if(out == null)
-            {
                 ooStream.writeObject(Properties.ERROR_UPLOAD_FILE);
-            }
-            else
-            {
-                ooStream.writeObject(Properties.SUCCESS_UPLOAD_FILE);
-                ooStream.writeObject(params[1]);
-                byte[] bytes = new byte[1024];
-
-                int count;
-                while ((count = iStream.read(bytes)) > 0)
-                {
-                    out.write(bytes, 0, count);
-                }
-                out.close();
+                ooStream.flush();
             }
         }
         else if(command.startsWith(Properties.COMMAND_DOWNLOAD))
         {
             String [] params = command.split(" ");
-            
             ooStream.writeObject(Properties.COMMAND_DOWNLOAD);
             
-            ooStream.writeObject(Properties.SUCCESS_DOWNLOAD_FILE);
-            ooStream.writeObject(params[1]);
-            
             File file = new File(params[1]);
-            // Get the size of the file
             long length = file.length();
             byte[] bytes = new byte[1024];
-            InputStream in = new FileInputStream(file);
-
-            ooStream.writeObject((Long)length);
-            
-            int count;
-            while ((count = in.read(bytes)) > 0)
+            try
             {
-                oStream.write(bytes, 0, count);
-                System.out.println("a");
-            }
+                InputStream in = new FileInputStream(file);
+                ooStream.writeObject(Properties.SUCCESS_DOWNLOAD_FILE);
+                ooStream.writeObject(params[1] + " " + params[2]);
+                ooStream.writeObject((Long)length);
+                ooStream.flush();
             
-            System.out.println("b");
-            in.close();
+                int count;
+                while ((count = in.read(bytes)) > 0)
+                {
+                    oStream.write(bytes, 0, count);
+                    oStream.flush();
+                }
+                in.close();
+            }
+            catch(FileNotFoundException ex)
+            {
+                ooStream.writeObject(Properties.ERROR_DOWLOAD_FILE);
+                ooStream.flush();
+            }
         }
     }
 }

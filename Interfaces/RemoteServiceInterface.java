@@ -14,9 +14,20 @@ public interface RemoteServiceInterface extends java.rmi.Remote
     public void removeObserver(RemoteObserverInterface observer)
             throws java.rmi.RemoteException;    
     
+    public void loginUser(RemoteObserverInterface user, RemoteClientInterface server)
+            throws java.rmi.RemoteException;
+    public void logoutUser(RemoteObserverInterface user, RemoteClientInterface server)
+            throws java.rmi.RemoteException;
+    
+    public void setMonitoringApp(RemoteMonitoringInterface monitoringApp)
+            throws java.rmi.RemoteException;
+    
     public RemoteClientInterface searchServerByName(String serverName)
             throws java.rmi.RemoteException;
     
     public List<RemoteClientInterface> allServersInfo()
+            throws java.rmi.RemoteException;
+    
+    public List<String> getAllObserversName()
             throws java.rmi.RemoteException;
 }

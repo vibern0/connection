@@ -5,27 +5,24 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
 
 public class TcpToServer
 {
     private final Socket socket;
-    private Map<String, Integer> params;
     public static OutputStream oStream;
-    private final ObjectOutputStream ooStream;
+    public static ObjectOutputStream ooStream;
     private final Thread thread_tcpconn;
+    private final TcpToServerReceiver tcpconn;
 
-    public TcpToServer(String hostname, int port)
+    public TcpToServer(String hostname, int port, String serverName)
             throws IOException
     {
-        registerNParams();
         
         socket = new Socket(hostname, port);
         oStream = this.socket.getOutputStream();
         ooStream = new ObjectOutputStream(oStream);
 
-        TcpToServerReceiver tcpconn = new TcpToServerReceiver(socket);
+        tcpconn = new TcpToServerReceiver(socket, serverName);
         thread_tcpconn = new Thread(tcpconn);
         thread_tcpconn.start();
         
@@ -33,28 +30,12 @@ public class TcpToServer
     
     public void close() throws IOException, InterruptedException
     {
+        tcpconn.toClose();
         oStream.close();
         ooStream.close();
+        socket.close();
         
         thread_tcpconn.join();
-    }
-    
-    private void registerNParams()
-    {
-        params = new HashMap<>();
-        params.put(Properties.COMMAND_DISCONNECT,       0);
-        params.put(Properties.COMMAND_CUR_DIR_PATH,     0);
-        params.put(Properties.COMMAND_REGISTER,         2);
-        params.put(Properties.COMMAND_LOGIN,            2);
-        params.put(Properties.COMMAND_LOGOUT,           0);
-        params.put(Properties.COMMAND_CREATE_DIRECTORY, 1);
-        params.put(Properties.COMMAND_LIST_CONTENT,     0);
-        params.put(Properties.COMMAND_CHANGE_DIRECTORY, 1);
-        params.put(Properties.COMMAND_COPY_FILE,        2);
-        params.put(Properties.COMMAND_MOVE_FILE,        2);
-        params.put(Properties.COMMAND_REMOVE_FILE,      1);
-        params.put(Properties.COMMAND_UPLOAD,           1);
-        params.put(Properties.COMMAND_DOWNLOAD,         1);
     }
     
     public void checkCommand(String command) throws IOException
@@ -72,18 +53,14 @@ public class TcpToServer
         }
         else
         {
-            String [] ps = command.split(" ");
-            Integer nparams = params.get(ps[0]);
-            
-            if(ps.length - 1 == nparams)
+            if(     command.startsWith(Properties.COMMAND_LOGIN) ||
+                    command.startsWith(Properties.COMMAND_REGISTER))
             {
-                ooStream.writeObject(command);
-                ooStream.flush();
+                String [] tmp = command.split(" ");
+                command = tmp[0] + " " + PDCliente.username + " " + tmp[1];
             }
-            else
-            {
-                System.out.println("Parameters missing!");
-            }
+            ooStream.writeObject(command);
+            ooStream.flush();
         }
     }
 

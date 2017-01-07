@@ -7,6 +7,7 @@ import pacliente.Properties;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.ObjectStreamException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -31,14 +32,18 @@ class TcpToServerReceiver implements Runnable
     public static List<Socket> connectedTo = null;
     private final Socket socket;
     private InputStream iStream;
+    private boolean toClose;
+    private final String root_folder;
     
-    public TcpToServerReceiver(Socket socket)
+    public TcpToServerReceiver(Socket socket, String serverName)
     {
         this.socket = socket;
         if(connectedTo == null)
         {
             connectedTo = new ArrayList<>();
         }
+        this.toClose = false;
+        this.root_folder = "remote" + serverName;
     }
 
     @Override
@@ -56,21 +61,27 @@ class TcpToServerReceiver implements Runnable
                 cmd = (String)oiStream.readObject();
                 runCommand(cmd, oiStream);
                 
-            }while(!cmd.equals(Properties.COMMAND_DISCONNECT));
+            }while(!cmd.equals(Properties.DISCONNECT_FROM_SERVER));
             oiStream.close();
         }
         catch (IOException | ClassNotFoundException ex)
         {
+            if(!toClose)
+            {
+                System.out.println("Ligacao TCP perdida!");
+            }
             Logger.getLogger(TcpToServerReceiver.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+    
+    public void toClose()
+    {
+        toClose = true;
     }
     
     public void runCommand(String command, ObjectInputStream oiStream)
             throws ClassNotFoundException, ObjectStreamException, IOException
     {
-        if(command.equals(Properties.COMMAND_DISCONNECT))
-            return;
-        
         if(command.equals(Properties.COMMAND_CUR_DIR_PATH))
         {
             String server_output;
@@ -169,8 +180,6 @@ class TcpToServerReceiver implements Runnable
         }
         else if(command.equals(Properties.COMMAND_UPLOAD))
         {
-            //começar copiar
-            //terminou copiar
             Integer output_type;
             output_type = (Integer)oiStream.readObject();
             if(output_type.equals(Properties.ERROR_UPLOAD_FILE))
@@ -179,17 +188,33 @@ class TcpToServerReceiver implements Runnable
             }
             else if(output_type.equals(Properties.SUCCESS_UPLOAD_FILE))
             {
-                File file = new File((String)oiStream.readObject());
+                OutputStream ostream = socket.getOutputStream();
+                String received = (String)oiStream.readObject();
+                if(received.charAt(0) != '/')
+                {
+                    received = '/' + received;
+                }
+                File file = new File(root_folder + received);
                 // Get the size of the file
                 byte[] bytes = new byte[1024];
-                InputStream in = new FileInputStream(file);
-
-                int count;
-                while ((count = in.read(bytes)) > 0) {
-                    TcpToServer.oStream.write(bytes, 0, count);
+                try
+                {
+                    InputStream in = new FileInputStream(file);
+                    TcpToServer.ooStream.writeObject((Long)file.length());
+                    TcpToServer.ooStream.flush();
+                    int count;
+                    while ((count = in.read(bytes)) > 0)
+                    {
+                        ostream.write(bytes, 0, count);
+                    }
+                    System.out.println("File uploaded.");
+                    in.close();
                 }
-                System.out.println("File uploaded.");
-                in.close();
+                catch(FileNotFoundException ex)
+                {
+                    TcpToServer.ooStream.writeObject(Properties.ERROR_UPLOAD_FILE);
+                    TcpToServer.ooStream.flush();
+                }
             }
         }
         else if(command.equals(Properties.COMMAND_DOWNLOAD))
@@ -197,22 +222,25 @@ class TcpToServerReceiver implements Runnable
             Integer output_type;
             output_type = (Integer)oiStream.readObject();
             
-            OutputStream out = null;
-            try
+            if(output_type.equals(Properties.ERROR_DOWLOAD_FILE))
             {
-                out = new FileOutputStream((String)oiStream.readObject());
-            }
-            catch (FileNotFoundException ex)
-            {
-                System.out.println("File not found. ");
+                System.out.println("Erro ao baixar ficheiro!");
+                return;
             }
             
-            if(out == null)
+            try
             {
-                System.out.println("Error creating file.");
-            }
-            else
-            {
+                command = (String)oiStream.readObject();
+                String [] params = command.split(" ");
+                if(params[2].charAt(0) != '/')
+                {
+                    params[2] = '/' + params[2];
+                }
+                if(params[2].lastIndexOf("/") != params[2].length())
+                {
+                    params[2] += '/';
+                }
+                OutputStream out = new FileOutputStream(params[2] + params[1]);
                 byte[] bytes = new byte[1024];
                 
                 long length = (Long)oiStream.readObject();
@@ -223,12 +251,15 @@ class TcpToServerReceiver implements Runnable
                 {
                     count = iStream.read(bytes);
                     out.write(bytes, 0, count);
-                    System.out.println("a");
+                    out.flush();
                     atual_length += count;
                 }
-                System.out.println("b");
                 out.close();
                 System.out.println("File dowloaded. ");
+            }
+            catch (FileNotFoundException ex)
+            {
+                System.out.println("File not found. ");
             }
         }
     }

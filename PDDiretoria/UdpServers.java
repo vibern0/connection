@@ -5,13 +5,15 @@ import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import padiretoria.Constants;
-import static padiretoria.Constants.*;
 
 public class UdpServers extends Thread {
 
     private final DatagramSocket socket;
     private final HashMap<String, ScheduledExecutorService> serversOn;
+    
+    public static final int MAX_DPACK_SIZE = 256;
+    public static final int HEARTBEAT_TIME = 4;
+    public static final int HEARTBEAT_TIMEOUT = 1;
 
     public UdpServers(int listeningPort) throws SocketException
     {
@@ -73,7 +75,7 @@ public class UdpServers extends Thread {
             }
             catch (IOException ex) { ex.printStackTrace(); }
             input_sock = new String(packet.getData(), 0, packet.getLength());
-            if(input_sock.startsWith(Constants.HEARTBEAT_SERVER))
+            if(input_sock.startsWith(Properties.HEARTBEAT_SERVER))
             {
                 registry = packet.getAddress().getHostAddress() + ":" + packet.getPort();
                 ScheduledExecutorService schedule = findServer(registry);

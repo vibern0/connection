@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -61,27 +62,6 @@ public class PDServidor
             System.exit(1);
         }
         
-        Thread tcp_thread = new TcpServer(serverSocket, args[0]);
-        tcp_thread.start();
-        
-        try
-        {
-            new Heartbeat(args[0], args[1], Integer.parseInt(args[2]), Integer.parseInt(args[3])).run();
-        }
-        catch (SocketException ex)
-        {
-            System.out.println("Erro ao iniciar UDP!");
-            tcp_thread.interrupt();
-            try
-            {
-                serverSocket.close();
-            } catch (IOException ex1) { }
-            //
-            Logger.getLogger(PDServidor.class.getName()).log(Level.SEVERE, null, ex);
-            //
-            return;
-        }
-        
         RMI rmi = null;
         try
         {
@@ -102,6 +82,37 @@ public class PDServidor
         {
             System.out.println("Erro E/S - " + e);
             System.exit(1);
+        }
+        
+        Thread tcp_thread = null;
+        try
+        {
+            tcp_thread = new TcpServer(serverSocket, args[0], rmi);
+            tcp_thread.start();
+        }
+        catch (SQLException | ClassNotFoundException ex)
+        {
+            System.err.println("Unable to read data from an open socket.");
+            System.err.println(ex.toString());
+            System.exit(1);
+        }
+        
+        try
+        {
+            new Heartbeat(args[0], args[1], Integer.parseInt(args[2]), Integer.parseInt(args[3])).run();
+        }
+        catch (SocketException ex)
+        {
+            System.out.println("Erro ao iniciar UDP!");
+            tcp_thread.interrupt();
+            try
+            {
+                serverSocket.close();
+            } catch (IOException ex1) { }
+            //
+            Logger.getLogger(PDServidor.class.getName()).log(Level.SEVERE, null, ex);
+            //
+            return;
         }
         
         System.out.println("<Enter> para terminar...");

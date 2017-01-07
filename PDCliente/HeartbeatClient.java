@@ -13,13 +13,16 @@ public class HeartbeatClient
     private final int port;
     private final DatagramSocket socket;
     private final ScheduledExecutorService scheduler;
-    public HeartbeatClient(DatagramSocket socket, String ip, int port)
+    private final String alive;
+    public HeartbeatClient(DatagramSocket socket, String ip, int port, String username)
     {
         this.socket = socket;
         this.ip = ip;
         this.port = port;
         this.scheduler = Executors.newScheduledThreadPool(1);
+        this.alive = COMMAND_HEARTBEAT + " " + username;
     }
+    
     public void run()
     {
         final Runnable heartbeat = new Runnable()
@@ -30,8 +33,8 @@ public class HeartbeatClient
                 DatagramPacket packet;
                 try
                 {
-                    packet = new DatagramPacket(COMMAND_HEARTBEAT.getBytes(),
-                            COMMAND_HEARTBEAT.length(), InetAddress.getByName(ip), port);
+                    packet = new DatagramPacket(alive.getBytes(),
+                            alive.length(), InetAddress.getByName(ip), port);
                     socket.send(packet);
                 }
                 catch (IOException ex)
@@ -43,5 +46,9 @@ public class HeartbeatClient
             }
         };
         scheduler.scheduleAtFixedRate(heartbeat, 0, HEARTBEAT_TIME, SECONDS);
+    }
+    public void close()
+    {
+        scheduler.shutdownNow();
     }
 }

@@ -12,11 +12,13 @@ public class RemoteService  extends UnicastRemoteObject
     public static final String SERVICE_NAME = "GetRemoteFile";
     List<RemoteObserverInterface> observers;
     List<RemoteClientInterface> servers;
+    RemoteMonitoringInterface monitoring;
     
     public RemoteService(File localDirectory) throws RemoteException 
     {
         observers = new ArrayList<>();
         servers = new ArrayList<>();
+        monitoring = null;
     }
     
     @Override
@@ -27,6 +29,10 @@ public class RemoteService  extends UnicastRemoteObject
             notifyObservers("O servidor " + server.getName() +
                     " conectou-se desde " + getClientHost());
             servers.add(server);
+            if(monitoring != null)
+            {
+                monitoring.notifyNewServer(server);
+            }
         }
         catch (ServerNotActiveException ex) { }
     }
@@ -37,6 +43,10 @@ public class RemoteService  extends UnicastRemoteObject
         if(servers.remove(server))
         {
             notifyObservers("O servidor " + server.getName() + " desconectou-se!");
+            if(monitoring != null)
+            {
+                monitoring.notifyCloseServer(server);
+            }
         }
     }
     
@@ -110,5 +120,55 @@ public class RemoteService  extends UnicastRemoteObject
             }
         }
         throw new RemoteException();
+    }
+    
+    @Override
+    public List<String> getAllObserversName()
+            throws RemoteException
+    {
+        List<String> observers_name;
+        List<RemoteObserverInterface> tmp;
+        observers_name = new ArrayList<>();
+        
+        for(RemoteClientInterface server : servers)
+        {
+            tmp = server.getAllConnectedUsers();
+            for(RemoteObserverInterface observer : tmp)
+            {
+                if(!observers_name.contains(observer.getName()))
+                {
+                    observers_name.add(observer.getName());
+                }
+            }
+        }
+        
+        return observers_name;
+    }
+
+    @Override
+    public void setMonitoringApp(RemoteMonitoringInterface monitoringApp)
+            throws RemoteException
+    {
+        monitoring = monitoringApp;
+    }
+
+    @Override
+    public void loginUser(RemoteObserverInterface user, RemoteClientInterface server)
+            throws RemoteException
+    {
+        if(monitoring != null)
+        {
+            monitoring.notifyNewUser(user, server);
+        }
+    }
+
+    @Override
+    public void logoutUser(RemoteObserverInterface user, RemoteClientInterface server)
+            throws RemoteException
+    {
+        if(monitoring != null)
+        {
+            monitoring.notifyCloseUser(user, server);
+        }
     }
 }

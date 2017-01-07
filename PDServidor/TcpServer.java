@@ -3,6 +3,7 @@
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.SQLException;
 import paservidor.Database;
 
 
@@ -11,11 +12,14 @@ public class TcpServer extends Thread
     private final ServerSocket serverSocket;
     private final Database database;
     private final String serverName;
-    public TcpServer(ServerSocket serverSocket, String serverName)
+    private final RMI rmi;
+    public TcpServer(ServerSocket serverSocket, String serverName, RMI rmi)
+            throws SQLException, ClassNotFoundException
     {
         this.serverSocket = serverSocket;
         this.serverName = serverName;
         this.database = new Database(serverName);
+        this.rmi = rmi;
     }
     
     @Override
@@ -26,7 +30,8 @@ public class TcpServer extends Thread
             while (true)
             {
                 Socket socket = this.serverSocket.accept();
-                TcpServerHandleClient handle = new TcpServerHandleClient(socket, serverName, database);
+                TcpServerHandleClient handle =
+                        new TcpServerHandleClient(socket, serverName, database, rmi);
                 Thread threadhandle = new Thread(handle);
                 threadhandle.start();
             }
